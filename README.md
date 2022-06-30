@@ -16,6 +16,6 @@ I've added an Level editor (check the html). Sry for not having time to make a b
 * When starting the game, `assets/game.ini` and `assets/level/level.ini` are read (Changes after restart)
 * If there is a package in `level.ini`, it will automatically search for a `info.json` within same named folder
 * This `info.json` is built with given editor and contains all needed package information:
-** All levels, morph positions, morph counts, targets, objects, collisions, animations (later)
-** All textures used in this package
-** Texture cannot be used for other packes (you need to duplicate)
+  * All levels, morph positions, morph counts, targets, objects, collisions, animations (later)
+  * All textures used in this package
+  * Texture cannot be used for other packes (you need to duplicate)
