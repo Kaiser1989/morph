@@ -627,7 +627,7 @@ fn create_textures(gl: &Gl, textures: &[Vec<&str>]) -> Vec<GlTexture> {
                         &File::load_bytes(path).expect(&format!("Failed to load file {}", path)),
                     )
                     .expect("Failed to read memory")
-                    .to_rgba()
+                    .to_rgba8()
                 })
                 .collect();
             GlTexture::new(gl, &images)

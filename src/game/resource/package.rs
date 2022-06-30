@@ -127,7 +127,7 @@ impl LevelInfo {
     pub fn new() -> LevelInfo {
         LevelInfo {
             dimension: Vec2::zeros(),
-            available_morphs: EnumMap::new(),
+            available_morphs: EnumMap::default(),
             morph: MorphInfo::default(),
             target: TargetInfo::default(),
             objects: Vec::default(),

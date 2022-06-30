@@ -11,7 +11,7 @@ path = "src/lib.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-game-gl = { git = "https://github.com/Kaiser1989/game-gl", branch = "graphics" }
+game-gl = { git = "https://github.com/Kaiser1989/game-gl"}
 specs = { version = "0.16.1", features = ["specs-derive", "shred-derive"] }
 log = "0.4.11"
 simple_logger = "1.11.0"
