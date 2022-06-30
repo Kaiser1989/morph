@@ -61,7 +61,11 @@ pub fn start() {
     let log_level = log::LevelFilter::Debug;
     #[cfg(not(debug_assertions))]
     let log_level = log::LevelFilter::Info;
-    match SimpleLogger::new().with_level(log_level).init() {
+    match SimpleLogger::new()
+        .with_utc_timestamps()
+        .with_level(log_level)
+        .init()
+    {
         Err(s) => println!("{}", s),
         _ => {}
     }

@@ -8,7 +8,7 @@ pub mod game;
 //////////////////////////////////////////////////
 // Entry point for android
 
-#[ndk_glue::main(backtrace)]
+#[ndk_glue::main(backtrace = "on")]
 fn main() {
     game::start();
 }

@@ -9,7 +9,13 @@ Feel free to add stuff or make commits.
 If you are on Windows, you can instantly start playing:
 `cargo run --release`
 
-It used to work on android with my own fixes of glutin and winit. But i cannot get it to work anymore.
+This project is also working on android, after fixing bugs in winit & glutin. Check my game engine for more information:
+https://github.com/Kaiser1989/game-gl
+
+I tried to push my fixes on both projects, but i failed, as both changes are bare workarounds, breaking with existing conventions,
+and need to be added to both projects at the same time. I can live with this fix, as i do not want to publish any crates.
+
+Currently their seems to be a bug, that my clicks are not handled in android emulator. Shouldn't be a big thing.
 
 # Editor
 I've added an Level editor (check the html). Sry for not having time to make a better documentation. But if you have any questions, feel free to ask. I will answer whenever i have time to do.
