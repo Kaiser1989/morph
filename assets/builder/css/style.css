@@ -1,0 +1,436 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+	font-family: Bahnschrift;
+}
+
+body {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	overflow: hidden;
+	
+	display: flex;
+	flex-direction: column;
+}
+
+h1 {
+	font-size: 1.5em;
+	margin: 0;
+}
+
+h2 {
+	font-size: 1.25em;
+	margin: 0.25em;
+}
+
+h3 {
+	font-size: 1.0em;
+	margin: 0;
+}
+
+button {
+	cursor: pointer;
+}
+
+header {
+	flex: 0 0 auto;
+	padding: 0.5em;
+	
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+header .info {
+	flex: 1 0 auto;
+}
+
+header .buttons {
+	flex: 0 0 auto;
+}
+
+header .files {
+	display: none;
+}
+
+hr {
+	border: none;
+	border-bottom: 1px solid gray;
+	width: 100%;
+	margin: 0;
+}
+
+main {
+	flex: 1 1 auto;
+	
+	display: flex;
+	flex-direction: row;
+	overflow: hidden;
+}
+
+.w_space {
+	width: 0.3em;
+	flex: 0 0 0.3em !important;
+}
+
+.h_space {
+	height: 0.3em;
+}
+
+.click {
+	height: 2em;
+	border-radius: 0.5em;
+	border: none;
+	box-shadow: 0 0 0.15em black;
+	background-color: #eee;
+	margin: 0.25em;
+}
+
+.sidebar {
+	flex: 0 0 22em;
+	
+	display: flex;
+	flex-direction: column;
+	
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.sidebar .tab_action {
+	flex: 0 0 auto;
+	display: flex;
+	flex-direction: row;
+	margin: -0.1em;
+	margin-top: 0em;
+}
+
+.sidebar .tab_action.sub {
+	font-size: 85%;
+}
+
+.sidebar .tab_action button {
+	font-family: inherit;
+	font-size: 110%;
+	display: block;
+	flex: 1 0 auto;
+	background-color: white;
+	padding: 0.3em;
+	margin: 0.1em;
+	border: 1px solid black;
+}
+
+.sidebar .tab_action button.active {
+	border-bottom: none;
+	font-weight: bold;
+}
+
+.sidebar .tab {
+	flex: 1 0 auto;
+	display: flex;
+	flex-direction: column;
+}
+
+.sidebar .side_header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.sidebar .list {
+	flex: 1 0 15em;
+	padding: 0.5em;
+	box-shadow: inset 0 0 0.25em black;
+	overflow: hidden;
+}
+
+.sidebar .list ul {
+	margin: 0;
+	padding: 0;
+	overflow: auto;
+	max-height: 100%;
+}
+
+.sidebar .list li {
+	list-style: none;
+	padding: 0.25em;
+	margin: 0.25em;
+	border: 1px solid gray;
+	background-color: #fff;
+	cursor: pointer;
+}
+
+.sidebar .list li.active {
+	background-color: rgba(76, 142, 208, 0.5);
+}
+
+.sidebar .package {
+	flex: 0 0 auto !important;
+}
+
+.sidebar .objects {
+	flex: 1 0 13em;
+	overflow: hidden;
+}
+
+.sidebar .selected, .sidebar .unselected {
+	flex: 1 0 auto;
+	display: flex;
+	flex-direction: column;
+}
+
+.sidebar .unselected {
+	align-items: center;
+	justify-content: center;
+}
+
+.sidebar .textures .frames {
+	font-size: 90%;
+}
+
+.sidebar .textures .frames li {
+	border: none;
+	background-color: inherit;
+	list-style: disc;
+	margin: 0;
+    margin-left: 0px;
+	margin-left: 4em;
+	padding: 0;
+}
+
+.sidebar .textures p {
+	display: inline-block;
+	margin: 0;
+	line-height: 2em;
+}
+
+.sidebar .textures .img {
+	display: inline-block;
+	width: 2em;
+	height: 2em;
+	margin-right: 0.5em;
+	background-position: center;
+	background-size: cover;
+	float: left;
+}
+
+.sidebar .attributes li {
+	border: none;
+	cursor: default;
+	padding: 0;
+}
+
+.sidebar .attributes .row {
+	display: flex;
+	flex-direction: row;
+	padding: 0.25em;
+}
+
+.sidebar .attributes .row > * {
+	flex: 1 0 auto;
+	margin: auto;
+}
+
+.sidebar .attributes .row img {
+	width: 1.5em;
+	display: block;
+}
+
+.sidebar .attributes .row label {
+	flex: 0 0 4em;
+	margin-right: 0.5em;
+}
+
+.sidebar .attributes .row label.multi {
+	margin-top: 0;
+}
+
+.sidebar .attributes .row label.small {
+	flex: 0 0 auto;
+}
+
+.sidebar .attributes .row input.small {
+	width: 1em;
+}
+
+.editor {
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	background-color: #ccc;
+	box-shadow: inset 0 0 0.25em black;	
+	
+	position: relative;
+}
+
+.editor .overlay {
+	position: absolute;
+	right: 1em;
+	bottom: 1em;
+	z-index: 10000;
+	
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+}
+
+.editor .zoom {
+	display: flex;
+	flex-direction: column
+}
+
+.editor .zoom button{
+	display: block;
+	margin: 0.5em;
+	width: 3em;
+	height: 3em;
+	text-align: center;
+	padding: 0;
+	border-radius: 3em;
+	font-weight: bold;
+	border: none;
+	box-shadow: 0 0 0.25em black;
+	background-color: #eee;
+}
+
+.editor .planes {
+	background-color: #eee;
+	box-shadow: 0 0 0.25em black;
+	margin: 0.5em;
+	padding: 0.5em 0.25em;	
+	border-radius: 0.25em;
+	
+	display: flex;
+	flex-direction: row;
+}
+
+.editor .planes .plane {
+	padding: 0 0.25em;
+}
+
+.editor .screen {
+	flex: 1 1 auto;
+	
+	display: flex;
+	flex-direction: column;
+	
+	overflow: auto;
+	padding: 4em;
+	
+	height: 100%;
+	width: 100%;
+	position: relative;
+}
+
+.editor .screen .viewport {
+	background-color: #fff;
+	margin: auto;
+	flex: 0 0 auto;
+	box-shadow: 0 0 0.125em black;
+	position: relative;
+	font-size: 2em;
+	transform-origin: top left;
+}
+
+.editor .screen .viewport .h_line {
+	position: absolute;
+	height: 100%;
+	border-left: 1px solid #ddd;
+	width: 1em;
+	pointer-events: none;
+}
+
+.editor .screen .viewport .v_line {
+	position: absolute;
+	width: 100%;
+	border-top: 1px solid #ddd;
+	height: 1em;
+	pointer-events: none;
+}
+
+.editor .screen .viewport .empty {
+	border: none;
+}
+
+.editor .screen .viewport .h_line *{
+	position: relative;
+	top: -1.5em;
+	margin: 0;
+	left: -1.25em;
+	text-align: center;
+	color: #777;
+	font-size: 40%;
+}
+
+.editor .screen .viewport .v_line *{
+	position: relative;
+	left: -1.75em;
+	margin: 0;
+	top: -0.6em;
+	text-align: left;
+	color: #777;
+	font-size: 40%;
+}
+
+.editor .screen .viewport .size_wrapper {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 0;
+	height: 0;
+	visibility: hidden;
+	overflow: hidden;
+}
+
+.editor .screen .viewport .size_wrapper .size {
+	height: 100em;
+}
+
+.editor .screen .viewport .content {
+	width: 0em;
+	height: 0em;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+}
+
+.editor .screen .viewport .content .object {
+	position: absolute;
+	background-size: 100% 100%;
+	width: 1em;
+	height: 1em;
+	opacity: 0.75;
+	cursor: pointer;
+}
+
+.editor .screen .viewport .content .object.none {
+	background-color: #ddd;
+}
+
+.editor .screen .viewport .content .object.block {
+	background-color: #999;
+	border: 2px solid red;
+}
+
+.editor .screen .viewport .content .morph {
+	position: absolute;
+	z-index: 300;
+}
+
+.editor .screen .viewport .content .target {
+	position: absolute;
+	z-index: 300;
+}
+
+.sjx-controls {
+	z-index: 9999;
+}

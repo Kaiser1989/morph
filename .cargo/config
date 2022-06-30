@@ -1,0 +1,5 @@
+[feature]
+Default = "serde-serialize"
+
+[profile.dev]
+opt-level = 3

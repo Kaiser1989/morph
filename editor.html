@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html data-ng-app="app">
+	<head>
+		<title>Level Editor | Morph it!</title>
+		
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		<link rel="stylesheet" href="assets/builder/css/subjx.css">
+		<link rel="stylesheet" href="assets/builder/css/style.css">
+
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.js"></script>
+		<script src="assets/builder/js/subjx.js"></script>
+		<script src="assets/builder/js/main.js"></script>
+	</head>
+	
+	<body data-ng-controller="ctrl">
+		<header>
+			<div class="info">
+				<h1>Morph Level Editor v1.3</h1>
+			</div>
+			<div class="buttons">
+				<button type="button" class="click" title="Save levels as file" data-ng-click="save()">Save</button>
+				<button type="button" class="click" title="Load levels from file" data-ng-click="load()">Load</button>
+				<a href="" id="out_file" download="info.json"></a>
+			</div>
+			<div class="files">
+				<input id="in_file" type="file" data-files data-ng-model="file" accept="application/JSON"/>
+				<input id="in_textures" type="file" data-files data-ng-model="texture_files" multiple accept="image/*"/>
+				<input id="in_frames" type="file" data-files data-ng-model="frame_files" multiple accept="image/*"/>
+			</div>
+		</header>
+		<main>
+			<div class="w_space"></div>	
+		
+			<div class="sidebar">	
+				<div class="tab_action">
+					<button data-ng-repeat="tab in tabs" data-ng-click="selectTab(tab)" data-ng-class="tab == active_tab ? 'active' : 'none'">{{tab}}</button>
+				</div>
+				
+				<div class="tab" data-ng-if="active_tab == 'Package'">
+					<div class="tab_action sub">
+						<button data-ng-repeat="packageTab in packageTabs" data-ng-click="selectPackageTab(packageTab)" data-ng-class="packageTab == active_package_tab ? 'active' : 'none'">{{packageTab}}</button>
+					</div>
+					
+					<div class="tab" data-ng-if="active_package_tab == 'Attributes'">
+						<div class="side_header">
+						</div>
+						<div class="list attributes">
+							<ul>
+								<li>
+									<div class="row">
+										<label for="name">name:</label>
+										<input type="text" id="name" class="input" data-ng-model="package.name">
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+				
+					<div class="tab" data-ng-if="active_package_tab == 'Levels'">
+						<div class="side_header">
+							<button title="Add level" type="button" class="click" data-ng-click="addLevel()">Add</button>
+							<button title="Move up" type="button" class="click" data-ng-click="upLevel()" data-ng-if="level_index > 0">Up</button>
+							<button title="Move down" type="button" class="click" data-ng-click="downLevel()" data-ng-if="level_index < levels.length - 1">Down</button>
+							<button title="Remove selected level" type="button" class="click" data-ng-click="removeLevel()">Remove</button>
+						</div>	
+						<div class="list levels" data-ng-if="package">
+							<ul>
+								<li data-ng-repeat="lvl in levels track by $index" data-ng-click="selectLevel($index)" data-ng-class="$index == level_index ? 'active' : ''">level {{$index}} ({{levels[$index].name}})</li>
+							</ul>
+						</div>
+					</div>
+					
+					<div class="tab" data-ng-if="active_package_tab == 'Textures'">
+						<div class="side_header">
+							<button title="Add texture" type="button" class="click" data-ng-click="addTextures()">Add texture(s)</button>
+							<button title="Add texture" type="button" class="click" data-ng-click="addFrames()">Add frame(s)</button>
+							<button title="Remove selected texture" type="button" class="click" data-ng-click="removeTexture()">Remove</button>
+						</div>		
+						<div class="list textures">
+							<ul>
+								<li data-ng-repeat="texture in textures track by $index" data-ng-click="selectTexture($index)" data-ng-class="$index == texture_index ? 'active' : ''">
+									<div class="img" data-ng-style="textureUrl($index)"></div>
+									<p>{{textures[$index][0]}}</p>
+									<ul class="frames" data-ng-if="textures[$index].length > 1">
+										<li data-ng-repeat="frame in textures[$index]" data-ng-if="!$first">{{frame}}</li>
+									</ul>
+								</li>
+							</ul>
+						</div>							
+					</div>
+				</div>
+				
+				<div class="tab" data-ng-if="active_tab == 'Level'">
+					
+					<div class="unselected" data-ng-if="!level">
+						No level selected ...
+					</div>
+					
+					<div class="selected" data-ng-if="level">
+						<div class="tab_action sub">
+							<button data-ng-repeat="levelTab in levelTabs" data-ng-click="selectLevelTab(levelTab)" data-ng-class="levelTab == active_level_tab ? 'active' : 'none'">{{levelTab}}</button>
+						</div>
+					
+						<div class="tab" data-ng-if="active_level_tab == 'Attributes'">
+							<div class="side_header"></div>				
+							<div class="list levels attributes" data-ng-if="level">
+								<ul>
+									<li>
+										<h3>Name:</h3>
+										<div class="row">
+											<input type="text" id="name" class="input" data-ng-model="level.name">
+										</div>
+									</li>						
+								
+									<li>
+										<h3>Dimension:</h3>
+										<div class="row">
+											<label for="dimension-x" class="small">x:</label>
+											<input type="number" id="dimension-x" min="5" max="99" class="input small" data-ng-model="level.dimension[0]">
+
+											<div class="w_space"></div>	
+
+											<label for="dimension-y" class="small">y:</label>
+											<input type="number" id="dimension-y" min="5" max="99" class="input small" data-ng-model="level.dimension[1]">
+										</div>
+									</li>
+									
+									<li>
+										<h3>Morph:</h3>
+										<div class="row">
+											<label for="morph-x" class="small">x:</label>
+											<input type="number" id="morph-x" step="any" min="-100" max="100" class="input small" data-ng-model="level.morph.position[0]">
+
+											<div class="w_space"></div>	
+
+											<label for="morph-y" class="small">y:</label>
+											<input type="number" id="morph-y" step="any" min="-100" max="100" class="input small" data-ng-model="level.morph.position[1]">
+										</div>
+										<div class="row">
+											<label for="morph-layer" class="small">layer:</label>
+											<input type="number" id="morph-layer" step="1" min="0" max="10" class="input" data-ng-model="level.morph.layer">
+										</div>
+									</li>
+									
+									<li>
+										<h3>Target:</h3>
+										<div class="row">
+											<label for="target-x" class="small">x:</label>
+											<input type="number" id="target-x" step="any" min="-100" max="100" class="input small" data-ng-model="level.target.position[0]">
+											
+											<div class="w_space"></div>									
+											
+											<label for="target-y" class="small">y:</label>
+											<input type="number" id="target-y" step="any" min="-100" max="100" class="input small" data-ng-model="level.target.position[1]">
+										</div>
+										<div class="row">
+											<label for="target-layer" class="small">layer:</label>
+											<input type="number" id="target-layer" step="1" min="0" max="10" class="input" data-ng-model="level.target.layer">
+										</div>
+									</li>
+									
+									<li>
+										<h3>Start morph:</h3>
+										<div class="row">
+											<label for="morph-metal" class="small"><img src="assets/builder/img/metal.png"></label>
+											<input type="radio" id="morph-metal" value="Metal" name="start_type" data-ng-model="level.morph.state">
+											
+											<div class="w_space"></div>	
+											
+											<label for="morph-rubber" class="small"><img src="assets/builder/img/rubber.png"></label>
+											<input type="radio" id="morph-rubber" value="Rubber" name="start_type" data-ng-model="level.morph.state">
+											
+											<div class="w_space"></div>	
+											
+											<label for="morph-water" class="small"><img src="assets/builder/img/water.png"></label>
+											<input type="radio" id="morph-water" value="Water" name="start_type" data-ng-model="level.morph.state">
+											
+											<div class="w_space"></div>	
+											
+											<label for="morph-bubble" class="small"><img src="assets/builder/img/bubble.png"></label>
+											<input type="radio" id="morph-bubble" value="Bubble" name="start_type" data-ng-model="level.morph.state">
+										</div>
+									</li>
+									
+									<li>
+										<h3>Available morphs:</h3>
+										<div class="row">
+											<label for="metal-count" class="small"><img src="assets/builder/img/metal.png"></label>
+											<input type="number" id="metal-count" min="0" max="10" class="input small" data-ng-model="level.available_morphs.Metal">
+											
+											<div class="w_space"></div>	
+											
+											<label for="rubber-count" class="small"><img src="assets/builder/img/rubber.png"></label>
+											<input type="number" id="metal-rubber" min="0" max="10" class="input small" data-ng-model="level.available_morphs.Rubber">
+										</div>
+										<div class="row">
+											<label for="water-count" class="small"><img src="assets/builder/img/water.png"></label>
+											<input type="number" id="water-count" min="0" max="10" class="input small" data-ng-model="level.available_morphs.Water">
+											
+											<div class="w_space"></div>	
+											
+											<label for="bubble-count" class="small"><img src="assets/builder/img/bubble.png"></label>
+											<input type="number" id="bubble-count" min="0" max="10" class="input small" data-ng-model="level.available_morphs.Bubble">
+										</div>
+									</li>						
+								</ul>
+							</div>
+						</div>
+						
+						<div class="tab" data-ng-if="active_level_tab == 'Objects'">
+							<div class="side_header">
+								<button title="Add object" type="button" class="click" data-ng-click="addObject()">Add</button>
+								<button title="Remove selected object" type="button" class="click" data-ng-click="removeObject()">Remove</button>
+							</div>			
+							<div class="list objects">
+								<ul>
+									<li data-ng-repeat="obj in level.objects track by $index" data-ng-click="selectObject($index)" data-ng-class="$index == object_index ? 'active' : ''">object {{$index}} ({{objects[$index].name}})</li>
+								</ul>
+							</div>	
+						</div>	
+					</div>
+				</div>
+				
+				
+				<div class="tab" data-ng-if="active_tab == 'Object'">
+					
+					<div class="unselected" data-ng-if="!object">
+						No object selected ...
+					</div>
+
+					<div class="selected" data-ng-if="object">
+						<div class="tab_action sub">
+							<button data-ng-repeat="objectTab in objectTabs" data-ng-click="selectObjectTab(objectTab)" data-ng-class="objectTab == active_object_tab ? 'active' : 'none'">{{objectTab}}</button>
+						</div>
+						
+						<div class="tab" data-ng-if="active_object_tab == 'Attributes'">
+							<div class="side_header"></div>			
+							<p class="info" data-ng-if="!object">No object selected ...</p>
+							<div class="list attributes" data-ng-if="object">
+								<ul>		
+									<li>
+										<h3>Name:</h3>
+										<div class="row">
+											<input type="text" id="name" class="input" data-ng-model="object.name">
+										</div>
+									</li>
+									
+									<li>
+										<h3>Position:</h3>
+										<div class="row">
+											<label for="object-pos-x" class="small">x:</label>
+											<input type="number" id="object-pos-x" step="any" min="-100" max="100" class="input small" data-ng-model="object.position[0]">
+
+											<div class="w_space"></div>	
+
+											<label for="object-pos-y" class="small">y:</label>
+											<input type="number" id="object-pos-y" step="any" min="-100" max="100" class="input small" data-ng-model="object.position[1]">
+										</div>
+									</li>
+
+									<li>
+										<h3>Size:</h3>
+										<div class="row">
+											<label for="object-size-x" class="small">x:</label>
+											<input type="number" id="object-size-x" step="any" min="0" max="100" class="input small" data-ng-model="object.size[0]">
+
+											<div class="w_space"></div>	
+
+											<label for="object-size-y" class="small">y:</label>
+											<input type="number" id="object-size-y" step="any" min="0" max="100" class="input small" data-ng-model="object.size[1]">
+										</div>	
+									</li>
+									
+									<li>
+										<h3>Rotation:</h3>
+										<div class="row">
+											<label for="object-rotation">angle:</label>
+											<input type="number" id="object-rotation" step="any" class="input" data-ng-model="object.rotation">
+										</div>	
+									</li>
+									
+									<li>
+										<h3>Texture:</h3>
+										<div class="row">
+											<label for="object-texture">x:</label>
+											<select id="texture" ng-model="object.texture">
+												<option ng-value="-1">-</option>
+												<option data-ng-repeat="texture in textures track by $index" ng-value="$index">{{textures[$index][0]}}</option>
+											</select>
+										</div>
+										<div data-ng-if="textures[object.texture].length > 0">
+											<div class="row">
+												<label for="object-texture">plane:</label>
+												<select id="texture" ng-model="object.texture_info.plane">
+													<option data-ng-repeat="plane in planes" value="{{plane}}">{{plane}}</option>
+												</select>
+											</div>
+											<div class="row">
+												<label for="object-layer">layer:</label>
+												<input type="number" id="object-layer" step="1" min="0" max="10" class="input" data-ng-model="object.texture_info.layer">
+											</div>
+											<div class="row" data-ng-if="textures[object.texture].length > 1">
+												<label for="object-animation">duration:</label>
+												<input type="number" id="object-animation" step="any" min="0" class="input" ng_model="object.texture_info.animation">
+											</div>	
+										</div>
+									</li>									
+									
+									<li>
+										<h3>Role:</h3>
+										<div class="row">
+											<label for="object-role">type:</label>
+											<select id="object-role" ng-model="object.role">
+												<option data-ng-repeat="role in roles" value="{{role}}">{{role}}</option>
+											</select>
+										</div>
+									</li>
+									
+									<li data-ng-if="object.role == 'Block'">
+										<h3>Block:</h3>
+										<div class="row">
+											<label class="multi" for="object_block_particles">particles:</label>
+											<select size="8" id="object_block_particles" ng-model="object.block.particles" multiple>
+												<option data-ng-repeat="texture in textures track by $index" ng-value="$index">{{textures[$index][0]}}</option>
+											</select>					
+										</div>
+									</li>
+									
+									<li data-ng-if="object.role == 'Breakable'">
+										<h3>Breakable:</h3>
+										<div class="row">
+											<label for="object_breakable_group">group:</label>
+											<input id="object_breakable_group" type="number" step="1" min="0" class="input" ng_model="object.breakable.group">
+										</div>
+									</li>								
+									
+									<li data-ng-if="object.role == 'Accelerator'">
+										<h3>Accelerator:</h3>
+										<div class="row">
+											<label for="object_accelerator_direction">direction:</label>
+											<select id="object_accelerator_direction" ng_model="object.accelerator.direction">
+												<option data-ng-repeat="direction in acceleratorDirections" value="{{direction}}">{{direction}}</option>
+											</select>
+										</div>
+										<div class="row">
+											<label for="object_accelerator_amplitude">amplitude:</label>
+											<input type="number" id="object_accelerator_amplitude" step="any" min="0" class="input" ng_model="object.accelerator.amplitude">
+										</div>
+										<div class="row">
+											<label>morph:</label>
+										
+											<label for="object_accelerator_morph_metal" class="small"><img src="assets/builder/img/metal.png"></label>
+											<input type="checkbox" id="object_accelerator_morph-metal" value="Metal" name="start_type" data-ng-model="object.accelerator.morph.Metal">
+											
+											<div class="w_space"></div>	
+											
+											<label for="object_accelerator_morph_rubber" class="small"><img src="assets/builder/img/rubber.png"></label>
+											<input type="checkbox" id="object_accelerator_morph_rubber" value="Rubber" name="start_type" data-ng-model="object.accelerator.morph.Rubber">
+											
+											<div class="w_space"></div>	
+											
+											<label for="object_accelerator_morph_water" class="small"><img src="assets/builder/img/water.png"></label>
+											<input type="checkbox" id="object_accelerator_morph_water" value="Water" name="start_type" data-ng-model="object.accelerator.morph.Water">
+											
+											<div class="w_space"></div>	
+											
+											<label for="object_accelerator_morph_bubble" class="small"><img src="assets/builder/img/bubble.png"></label>
+											<input type="checkbox" id="object_accelerator_morph_bubble" value="Bubble" name="start_type" data-ng-model="object.accelerator.morph.Bubble">
+										</div>
+									</li>	
+								</ul>
+							</div>						
+						</div>
+					</div>
+				</div>	
+			</div>
+			
+			<div class="w_space"></div>	
+		
+			<div class="editor">
+				<div class="screen" data-ng-click="unselectObject()">
+					<div class="viewport" data-ng-if="level" data-ng-style="{'width': level.dimension[0] * 2 + 'em', 'height': + level.dimension[1] * 2 + 'em', 'font-size': zoom + 'em'}" data-ng-click="$event.stopPropagation()">
+						<div class="h_line" data-ng-repeat="x in [].constructor( level.dimension[0] * 2 + 1) track by $index" data-ng-style="{'left': $index + 'em'}" data-ng-class="$last ? 'empty' : ''"><p>{{$index - level.dimension[0]}}</p></div>
+						<div class="v_line" data-ng-repeat="y in [].constructor( level.dimension[1] * 2 + 1) track by $index" data-ng-style="{'top': $index + 'em'}" data-ng-class="$last ? 'empty' : ''"><p>{{-($index - level.dimension[1])}}</p></div>
+						<div id="content" class="content">
+							<div id="morph" class="object morph" data-ng-style="morphStyle()" data-ng-click="selectMorph()"></div>
+							<div id="target" class="object target" data-ng-style="targetStyle()" data-ng-click="selectTarget()"></div>
+							<div class="object" id="object-{{$index}}" data-ng-repeat="obj in level.objects track by $index" data-ng-click="selectObject($index)" data-ng-class="objectClass($index)" data-ng-style="objectStyle($index)"></div>
+						</div>
+						<div class="size_wrapper">
+							<div class="size" id="sizer"></div>
+						</div>
+					</div>					
+				</div>
+				<div class="overlay" data-ng-if="level">
+					<div class="zoom">
+						<button title="Zoom in" type="button" data-ng-click="zoomIn()">+</button>
+						<button title="Zoom out" type="button" data-ng-click="zoomOut()">-</button>
+					</div>				
+					<div class="planes">
+						<div class="plane" data-ng-repeat="plane in planes">
+							<input id="plane_{{plane}}" type="checkbox" data-ng-model="planeVisibility[plane]">
+							<label for="plane_{{plane}}">{{plane}}</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="w_space"></div>			
+			
+		</main>
+		
+		<div class="h_space"></div>
+	</body>
+</html>
