@@ -9,8 +9,7 @@ Feel free to add stuff or make commits.
 If you are on Windows, you can instantly start playing:
 `cargo run --release`
 
-It's based on my own OpenGl/Winit/Glutin fix, that works on android, so this game also works on android, producing working APKs if you follow installation as described here:
-https://github.com/Kaiser1989/game-gl
+It used to work on android with my own fixes of glutin and winit. But i cannot get it to work anymore.
 
 # Editor
 I've added an Level editor (check the html). Sry for not having time to make a better documentation. But if you have any questions, feel free to ask. I will answer whenever i have time to do.
