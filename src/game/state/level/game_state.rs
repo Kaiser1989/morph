@@ -68,13 +68,7 @@ impl LevelState {
         let reader = events.register();
         let scene = Scene::new(events.register());
         let phase = LevelPhase::Preview;
-        LevelState {
-            gui,
-            scene,
-            events,
-            reader,
-            phase,
-        }
+        LevelState { gui, scene, events, reader, phase }
     }
 }
 

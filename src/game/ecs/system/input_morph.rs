@@ -87,10 +87,8 @@ impl<'a> System<'a> for InputMorphSystem {
                 }
             }
             // change physics
-            data.velocity_limit
-                .insert(morph_entity, morph_state.velocity_limit());
-            data.velocity_damping
-                .insert(morph_entity, morph_state.velocity_damping());
+            data.velocity_limit.insert(morph_entity, morph_state.velocity_limit());
+            data.velocity_damping.insert(morph_entity, morph_state.velocity_damping());
             data.gravity.insert(morph_entity, morph_state.gravity());
             data.mass.insert(morph_entity, morph_state.mass());
             data.collision.insert(morph_entity, morph_state.collision());

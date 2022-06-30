@@ -143,11 +143,7 @@ impl<T: Event + Clone> Gui<T> {
         // dimension
         self.resolution = resolution;
         let aspect_ratio = resolution.x / resolution.y;
-        let aspect_vec = if aspect_ratio > 1.0 {
-            vec2(aspect_ratio, 1.0)
-        } else {
-            vec2(1.0, 1.0 / aspect_ratio)
-        };
+        let aspect_vec = if aspect_ratio > 1.0 { vec2(aspect_ratio, 1.0) } else { vec2(1.0, 1.0 / aspect_ratio) };
         self.dimension = aspect_vec * CONFIG.menu_camera_zoom;
         // change pos/size of root element
         self.builder.pos = vec2(0.0, self.dimension.y);
@@ -181,11 +177,9 @@ impl<T: Event + Clone> Gui<T> {
                 (gui_data.texture, instance)
             })
             .collect();
-        instances.sort_unstable_by(|(t0, i0), (t1, i1)| {
-            match i0.layer.partial_cmp(&i1.layer).unwrap() {
-                Ordering::Equal => t0.cmp(t1),
-                x => x,
-            }
+        instances.sort_unstable_by(|(t0, i0), (t1, i1)| match i0.layer.partial_cmp(&i1.layer).unwrap() {
+            Ordering::Equal => t0.cmp(t1),
+            x => x,
         });
 
         // create glyph instances; sort by layer
@@ -226,11 +220,7 @@ impl<T: Event + Clone> Gui<T> {
             graphics.find_texture(texture).bind(1);
 
             // draw
-            graphics.gui_shader.draw_elements_instanced(
-                gl::TRIANGLE_STRIP,
-                graphics.quad_ibo.count(),
-                instances.len(),
-            );
+            graphics.gui_shader.draw_elements_instanced(gl::TRIANGLE_STRIP, graphics.quad_ibo.count(), instances.len());
 
             // unbind textures
             graphics.find_texture(texture).unbind();
@@ -260,11 +250,7 @@ impl<T: Event + Clone> Gui<T> {
         graphics.glyph_texture.bind(2);
 
         // draw
-        graphics.glyph_shader.draw_elements_instanced(
-            gl::TRIANGLE_STRIP,
-            graphics.quad_ibo.count(),
-            glyph_instances.len(),
-        );
+        graphics.glyph_shader.draw_elements_instanced(gl::TRIANGLE_STRIP, graphics.quad_ibo.count(), glyph_instances.len());
 
         // unbind all
         graphics.glyph_texture.unbind();
@@ -305,33 +291,19 @@ impl<T: Event + Clone> GuiBuilder<T> {
 
     pub fn size(mut self, width: Value, height: Value) -> GuiBuilder<T> {
         self.auto_size.x = if let Value::Auto = width { true } else { false };
-        self.auto_size.y = if let Value::Auto = height {
-            true
-        } else {
-            false
-        };
+        self.auto_size.y = if let Value::Auto = height { true } else { false };
         self.size.x = if let Value::Fixed(x) = width { x } else { 0.0 };
         self.size.y = if let Value::Fixed(y) = height { y } else { 0.0 };
         self
     }
 
     pub fn padding(mut self, left: f32, right: f32, bottom: f32, top: f32) -> GuiBuilder<T> {
-        self.padding = Space {
-            left,
-            right,
-            bottom,
-            top,
-        };
+        self.padding = Space { left, right, bottom, top };
         self
     }
 
     pub fn margin(mut self, left: f32, right: f32, bottom: f32, top: f32) -> GuiBuilder<T> {
-        self.margin = Space {
-            left,
-            right,
-            bottom,
-            top,
-        };
+        self.margin = Space { left, right, bottom, top };
         self
     }
 
@@ -420,14 +392,10 @@ fn update<T: Event + Clone>(element: &mut GuiBuilder<T>) {
             .chars()
             .map(|c| {
                 let char_width = *FONT_WIDTHS.get(&c).unwrap();
-                let mut child = GuiBuilder::<T>::new("font_do_not_search_for")
-                    .size(Value::Fixed(size * char_width), Value::Fixed(*size))
-                    .margin(
-                        size * CONFIG.font_spacing,
-                        size * CONFIG.font_spacing,
-                        0.0,
-                        0.0,
-                    );
+                let mut child =
+                    GuiBuilder::<T>::new("font_do_not_search_for")
+                        .size(Value::Fixed(size * char_width), Value::Fixed(*size))
+                        .margin(size * CONFIG.font_spacing, size * CONFIG.font_spacing, 0.0, 0.0);
                 child.glyph = Some((c, char_width, *color));
                 child
             })
@@ -452,27 +420,12 @@ fn update<T: Event + Clone>(element: &mut GuiBuilder<T>) {
             let x_right = pos.x + size.x - padding.right;
 
             // check fill size elements
-            let count = element
-                .children
-                .iter_mut()
-                .filter(|child| child.auto_size.x)
-                .count();
+            let count = element.children.iter_mut().filter(|child| child.auto_size.x).count();
             if count > 0 {
-                let fill_x = (x_right
-                    - x_left
-                    - element
-                        .children
-                        .iter()
-                        .map(|child| child.margin.left + child.size.x + child.margin.right)
-                        .sum::<f32>())
-                    / count as f32;
-                element
-                    .children
-                    .iter_mut()
-                    .filter(|child| child.auto_size.x)
-                    .for_each(|child| {
-                        child.size.x = fill_x;
-                    });
+                let fill_x = (x_right - x_left - element.children.iter().map(|child| child.margin.left + child.size.x + child.margin.right).sum::<f32>()) / count as f32;
+                element.children.iter_mut().filter(|child| child.auto_size.x).for_each(|child| {
+                    child.size.x = fill_x;
+                });
             }
 
             // iterate over children and set position
@@ -516,16 +469,10 @@ fn update<T: Event + Clone>(element: &mut GuiBuilder<T>) {
             let remain = x_right - x_left;
             match element.x_align {
                 CENTER => {
-                    element
-                        .children
-                        .iter_mut()
-                        .for_each(|child| child.pos.x += remain * 0.5);
+                    element.children.iter_mut().for_each(|child| child.pos.x += remain * 0.5);
                 }
                 RIGHT => {
-                    element
-                        .children
-                        .iter_mut()
-                        .for_each(|child| child.pos.x += remain);
+                    element.children.iter_mut().for_each(|child| child.pos.x += remain);
                 }
                 _ => {} // nothing to do
             }
@@ -536,27 +483,12 @@ fn update<T: Event + Clone>(element: &mut GuiBuilder<T>) {
             let y_bottom = pos.y - size.y + padding.bottom;
 
             // check fill size elements
-            let count = element
-                .children
-                .iter_mut()
-                .filter(|child| child.auto_size.y)
-                .count();
+            let count = element.children.iter_mut().filter(|child| child.auto_size.y).count();
             if count > 0 {
-                let fill_y = (y_top
-                    - y_bottom
-                    - element
-                        .children
-                        .iter()
-                        .map(|child| child.margin.top + child.size.y + child.margin.bottom)
-                        .sum::<f32>())
-                    / count as f32;
-                element
-                    .children
-                    .iter_mut()
-                    .filter(|child| child.auto_size.y)
-                    .for_each(|child| {
-                        child.size.y = fill_y;
-                    });
+                let fill_y = (y_top - y_bottom - element.children.iter().map(|child| child.margin.top + child.size.y + child.margin.bottom).sum::<f32>()) / count as f32;
+                element.children.iter_mut().filter(|child| child.auto_size.y).for_each(|child| {
+                    child.size.y = fill_y;
+                });
             }
 
             // iterate over children and set position
@@ -600,16 +532,10 @@ fn update<T: Event + Clone>(element: &mut GuiBuilder<T>) {
             let remain = y_top - y_bottom;
             match element.y_align {
                 CENTER => {
-                    element
-                        .children
-                        .iter_mut()
-                        .for_each(|child| child.pos.y -= remain * 0.5);
+                    element.children.iter_mut().for_each(|child| child.pos.y -= remain * 0.5);
                 }
                 BOTTOM => {
-                    element
-                        .children
-                        .iter_mut()
-                        .for_each(|child| child.pos.y -= remain);
+                    element.children.iter_mut().for_each(|child| child.pos.y -= remain);
                 }
                 _ => {} // nothing to do
             }
@@ -633,10 +559,7 @@ fn collect_render_data<T: Event + Clone>(element: &GuiBuilder<T>) -> Vec<GuiRend
     // get data of this element
     if let Some((texture, texture_slot)) = &element.texture {
         // add center texture
-        let position = vec2(
-            element.pos.x + element.size.x * 0.5,
-            element.pos.y - element.size.y * 0.5,
-        );
+        let position = vec2(element.pos.x + element.size.x * 0.5, element.pos.y - element.size.y * 0.5);
         let size = element.size * 0.5;
         let layer = element.layer;
         let texture = *texture;
@@ -648,27 +571,12 @@ fn collect_render_data<T: Event + Clone>(element: &GuiBuilder<T>) -> Vec<GuiRend
             None => (4..5),
         }
         .for_each(|i| {
-            data.push(GuiRenderInfo::new(
-                position,
-                size,
-                color,
-                layer,
-                texture,
-                texture_slot,
-                i as f32,
-                radius,
-            ));
+            data.push(GuiRenderInfo::new(position, size, color, layer, texture, texture_slot, i as f32, radius));
         });
     }
 
     // get data of children
-    data.extend(
-        element
-            .children
-            .iter()
-            .map(|child| collect_render_data(child))
-            .flatten(),
-    );
+    data.extend(element.children.iter().map(|child| collect_render_data(child)).flatten());
 
     data
 }
@@ -678,10 +586,7 @@ fn collect_font_render_data<T: Event + Clone>(element: &GuiBuilder<T>) -> Vec<Gu
 
     // get text data of this element
     if let Some((glyph, width, color)) = &element.glyph {
-        let position = vec2(
-            element.pos.x + element.size.x * 0.5,
-            element.pos.y - element.size.y * 0.5,
-        );
+        let position = vec2(element.pos.x + element.size.x * 0.5, element.pos.y - element.size.y * 0.5);
         let size = vec2(element.size.x * 0.5, element.size.y * 0.5);
         let color = *color;
         let layer = element.layer - CONFIG.menu_layer_font_offset;
@@ -698,13 +603,7 @@ fn collect_font_render_data<T: Event + Clone>(element: &GuiBuilder<T>) -> Vec<Gu
     }
 
     // get data of children
-    data.extend(
-        element
-            .children
-            .iter()
-            .map(|child| collect_font_render_data(child))
-            .flatten(),
-    );
+    data.extend(element.children.iter().map(|child| collect_font_render_data(child)).flatten());
 
     data
 }
@@ -724,13 +623,7 @@ fn click_element<T: Event + Clone>(element: &GuiBuilder<T>, click: Vec2) -> Vec<
     }
 
     // get events of children
-    events.extend(
-        element
-            .children
-            .iter()
-            .map(|child| click_element(child, click))
-            .flatten(),
-    );
+    events.extend(element.children.iter().map(|child| click_element(child, click)).flatten());
 
     events
 }
@@ -750,28 +643,16 @@ fn fast_click_element<T: Event + Clone>(element: &GuiBuilder<T>, click: Vec2) ->
     }
 
     // get events of children
-    events.extend(
-        element
-            .children
-            .iter()
-            .map(|child| fast_click_element(child, click))
-            .flatten(),
-    );
+    events.extend(element.children.iter().map(|child| fast_click_element(child, click)).flatten());
 
     events
 }
 
-fn find_element<'a, T: Event + Clone>(
-    element: &'a mut GuiBuilder<T>,
-    id: &str,
-) -> Option<&'a mut GuiBuilder<T>> {
+fn find_element<'a, T: Event + Clone>(element: &'a mut GuiBuilder<T>, id: &str) -> Option<&'a mut GuiBuilder<T>> {
     if element.id == id {
         Some(element)
     } else {
-        element
-            .children
-            .iter_mut()
-            .find_map(|child| find_element(child, id))
+        element.children.iter_mut().find_map(|child| find_element(child, id))
     }
 }
 
@@ -802,16 +683,7 @@ pub fn create_font_widths() -> HashMap<char, f32> {
 }
 
 impl GuiRenderInfo {
-    pub fn new(
-        position: Vec2,
-        size: Vec2,
-        color: Vec4,
-        layer: f32,
-        texture: TextureSrc,
-        texture_slot: usize,
-        slice: f32,
-        radius: f32,
-    ) -> GuiRenderInfo {
+    pub fn new(position: Vec2, size: Vec2, color: Vec4, layer: f32, texture: TextureSrc, texture_slot: usize, slice: f32, radius: f32) -> GuiRenderInfo {
         GuiRenderInfo {
             position,
             size,

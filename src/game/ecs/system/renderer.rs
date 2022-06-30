@@ -74,20 +74,18 @@ impl RenderSystem {
             (&data.opacity).maybe(),
         )
             .join()
-            .map(
-                |(_, position, rotation, shape, texture, layer, texture_slot, opacity)| {
-                    let instance = Instance {
-                        translate: position.0,
-                        rotate: rotation.map(|x| x.0).unwrap_or(0.0),
-                        scale: shape.size(),
-                        layer: -(layer.plane.layer() + (layer.rank as f32) / 10.0), // inverse layer
-                        tex_slot: texture_slot.map(|x| x.0).unwrap_or(0.0),
-                        opacity: opacity.map(|x| x.0).unwrap_or(1.0),
-                        // TODO: Add Color
-                    };
-                    (layer.plane, texture.0, instance)
-                },
-            )
+            .map(|(_, position, rotation, shape, texture, layer, texture_slot, opacity)| {
+                let instance = Instance {
+                    translate: position.0,
+                    rotate: rotation.map(|x| x.0).unwrap_or(0.0),
+                    scale: shape.size(),
+                    layer: -(layer.plane.layer() + (layer.rank as f32) / 10.0), // inverse layer
+                    tex_slot: texture_slot.map(|x| x.0).unwrap_or(0.0),
+                    opacity: opacity.map(|x| x.0).unwrap_or(1.0),
+                    // TODO: Add Color
+                };
+                (layer.plane, texture.0, instance)
+            })
             .collect();
         instances.sort_unstable_by(|(p0, t0, i0), (p1, t1, i1)| match p0.cmp(p1) {
             Ordering::Equal => match i0.layer.partial_cmp(&i1.layer).unwrap() {
@@ -106,17 +104,10 @@ impl RenderSystem {
             // calculate aspect ratio
             let resolution = graphics.resolution();
             let aspect_ratio = resolution.x / resolution.y;
-            let aspect_vec = if aspect_ratio > 1.0 {
-                vec2(aspect_ratio, 1.0)
-            } else {
-                vec2(1.0, 1.0 / aspect_ratio)
-            };
+            let aspect_vec = if aspect_ratio > 1.0 { vec2(aspect_ratio, 1.0) } else { vec2(1.0, 1.0 / aspect_ratio) };
 
             // calculate zoom
-            let max_zoom = comp_min(&vec2(
-                camera.max_dimension.x / aspect_vec.x,
-                camera.max_dimension.y / aspect_vec.y,
-            ));
+            let max_zoom = comp_min(&vec2(camera.max_dimension.x / aspect_vec.x, camera.max_dimension.y / aspect_vec.y));
             let zoom = camera.zoom.min(max_zoom);
 
             // calculate position
@@ -125,14 +116,7 @@ impl RenderSystem {
             position.0 = min2(&max2(&position.0, &-cam_space), &cam_space);
 
             // calc ortho
-            let proj = ortho_rh(
-                -dimension.x,
-                dimension.x,
-                -dimension.y,
-                dimension.y,
-                0.1,
-                10.0,
-            );
+            let proj = ortho_rh(-dimension.x, dimension.x, -dimension.y, dimension.y, 0.1, 10.0);
 
             // calc view
             let eye = vec3(position.0.x, position.0.y, 0.0);
@@ -175,11 +159,7 @@ impl RenderSystem {
                 graphics.find_texture(texture).bind(1);
 
                 // draw
-                graphics.quad_shader.draw_elements_instanced(
-                    gl::TRIANGLE_STRIP,
-                    graphics.quad_ibo.count(),
-                    instances.len(),
-                );
+                graphics.quad_shader.draw_elements_instanced(gl::TRIANGLE_STRIP, graphics.quad_ibo.count(), instances.len());
 
                 // unbind textures
                 graphics.find_texture(texture).unbind();

@@ -47,8 +47,7 @@ impl<'a> System<'a> for InputCameraSystem {
             let morph_entity = data.actors.morph.unwrap();
             let camera_entity = data.actors.camera.unwrap();
             data.follow.insert(camera_entity, Follow(morph_entity));
-            data.follow_lag
-                .insert(camera_entity, FollowLag(CONFIG.level_camera_follow));
+            data.follow_lag.insert(camera_entity, FollowLag(CONFIG.level_camera_follow));
         }
 
         // check camera move event

@@ -63,11 +63,7 @@ impl Scene {
     pub fn new(reader: ReaderId<LevelEvent>) -> Scene {
         let world = World::new();
         let systems = Systems::default();
-        Scene {
-            reader,
-            world,
-            systems,
-        }
+        Scene { reader, world, systems }
     }
 
     pub fn init(&mut self, resource: &ResourceContext) {
@@ -177,9 +173,7 @@ impl Scene {
 // World
 
 fn init_world(world: &mut World, resource: &ResourceContext) {
-    if let (Some(_package_info), Some(level_info)) =
-        (resource.package_info(), resource.level_info())
-    {
+    if let (Some(_package_info), Some(level_info)) = (resource.package_info(), resource.level_info()) {
         // get level infos
         let morph_info = &level_info.morph;
         let portal_info = &level_info.target;
@@ -232,21 +226,10 @@ fn init_world(world: &mut World, resource: &ResourceContext) {
             .with(Role::Portal.sensor())
             .with(Role::Portal.shape())
             .with(Role::Portal.texture())
-            .with(Layer::new(
-                Plane::View,
-                portal_info.layer.max(morph_info.layer.max(1) + 1),
-            ))
+            .with(Layer::new(Plane::View, portal_info.layer.max(morph_info.layer.max(1) + 1)))
             .with(Portal)
-            .with(Animation::with_kind(
-                smallvec![TextureSlot::new(0.0), TextureSlot::new(30.0)],
-                1.5,
-                AnimationKind::Repeat,
-            ))
-            .with(Animation::with_kind(
-                smallvec![Rotation::new(0.0), Rotation::new(PI * 2.0)],
-                10.0,
-                AnimationKind::Repeat,
-            ))
+            .with(Animation::with_kind(smallvec![TextureSlot::new(0.0), TextureSlot::new(30.0)], 1.5, AnimationKind::Repeat))
+            .with(Animation::with_kind(smallvec![Rotation::new(0.0), Rotation::new(PI * 2.0)], 10.0, AnimationKind::Repeat))
             .build();
 
         // create objects
@@ -262,9 +245,7 @@ fn init_world(world: &mut World, resource: &ResourceContext) {
             // adding texture?
             if object_info.texture >= 0 {
                 let texture_info = object_info.texture_info.as_ref().unwrap();
-                builder = builder.with(Texture::new(TextureSrc::Package(
-                    object_info.texture as usize,
-                )));
+                builder = builder.with(Texture::new(TextureSrc::Package(object_info.texture as usize)));
                 builder = builder.with(Layer::new(texture_info.plane, texture_info.layer));
                 // // adding animation?
                 // let sub_tex_len = package_info.textures[object_info.texture as usize].len();
@@ -286,15 +267,8 @@ fn init_world(world: &mut World, resource: &ResourceContext) {
                 Role::Accelerator => {
                     let accelerator_info = object_info.accelerator.as_ref().unwrap();
                     let accelerator_direction: Vec2 = accelerator_info.direction.into();
-                    builder = builder.with(Accelerator::new(
-                        accelerator_direction * accelerator_info.amplitude,
-                    ));
-                    let morphs: Vec<usize> = accelerator_info
-                        .morph
-                        .iter()
-                        .filter(|&(_, v)| *v)
-                        .map(|(k, _)| k.sensor().group)
-                        .collect();
+                    builder = builder.with(Accelerator::new(accelerator_direction * accelerator_info.amplitude));
+                    let morphs: Vec<usize> = accelerator_info.morph.iter().filter(|&(_, v)| *v).map(|(k, _)| k.sensor().group).collect();
                     builder = builder.with(Role::Accelerator.collision());
                     builder = builder.with(Sensor {
                         group: Role::Accelerator.sensor().group,

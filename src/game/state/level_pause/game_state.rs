@@ -36,11 +36,7 @@ impl LevelPauseState {
         let gui = Gui::new();
         let mut events = Events::new();
         let reader = events.register();
-        LevelPauseState {
-            gui,
-            events,
-            reader,
-        }
+        LevelPauseState { gui, events, reader }
     }
 }
 

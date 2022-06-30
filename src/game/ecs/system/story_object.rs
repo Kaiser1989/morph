@@ -60,22 +60,13 @@ impl<'a> System<'a> for StoryObjectSystem {
         self.contact_tracker.update(&data.contact);
 
         // check breakables
-        for (entity, breakable, _) in (
-            &data.entities,
-            &data.breakable,
-            self.contact_tracker.inserted(),
-        )
-            .join()
-        {
+        for (entity, breakable, _) in (&data.entities, &data.breakable, self.contact_tracker.inserted()).join() {
             let broken = data.broken.get(entity).is_some();
             let mut contact = *data.contact.get(entity).unwrap();
             let impulse_length = length(&contact.0);
             if !broken && impulse_length > CONFIG.physic_break_impulse {
                 // find all group entities
-                for (entity, _) in (&data.entities, &data.breakable)
-                    .join()
-                    .filter(|(_, b)| b.0 == breakable.0)
-                {
+                for (entity, _) in (&data.entities, &data.breakable).join().filter(|(_, b)| b.0 == breakable.0) {
                     // random angular rotation
                     let mut rng = rand::thread_rng();
                     let rotation = data.rotation.get_mut(entity).unwrap();
@@ -91,16 +82,13 @@ impl<'a> System<'a> for StoryObjectSystem {
                         Uniform::new_inclusive(-0.2, 0.2).sample(&mut rng),
                     );
                     // (angular)
-                    velocity.1 =
-                        rotation_offset * Uniform::new_inclusive(5.0, 8.0).sample(&mut rng);
+                    velocity.1 = rotation_offset * Uniform::new_inclusive(5.0, 8.0).sample(&mut rng);
 
                     // add components
                     data.dynamic.insert(entity, Dynamic);
                     data.mass.insert(entity, Mass::new(5.0, 0.5));
-                    data.velocity_damping
-                        .insert(entity, VelocityDamping::new(0.1, 0.1));
-                    data.velocity_limit
-                        .insert(entity, VelocityLimit::new(10.0, 10.0));
+                    data.velocity_damping.insert(entity, VelocityDamping::new(0.1, 0.1));
+                    data.velocity_limit.insert(entity, VelocityLimit::new(10.0, 10.0));
                     data.gravity.insert(entity, Gravity::new(-9.81));
                     data.material.insert(entity, Material::new(0.3, 0.5));
                     data.collision.insert(entity, Role::Particle.collision());

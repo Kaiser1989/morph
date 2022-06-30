@@ -192,32 +192,17 @@ lazy_static! {
 //////////////////////////////////////////////////
 // Helper
 
-fn read_from_ini<T: std::fmt::Debug + std::str::FromStr>(
-    section: &str,
-    property: &str,
-    default: T,
-) -> T {
-    let opt_section = if section.is_empty() {
-        None
-    } else {
-        Some(section)
-    };
+fn read_from_ini<T: std::fmt::Debug + std::str::FromStr>(section: &str, property: &str, default: T) -> T {
+    let opt_section = if section.is_empty() { None } else { Some(section) };
     if let Some(sec) = INI.section(opt_section) {
         if let Some(prop) = sec.get(property) {
             if let Ok(x) = prop.parse::<T>() {
                 return x;
             } else {
-                print!(
-                    "Failed to parse '{}' as '{}'. ",
-                    prop,
-                    std::any::type_name::<T>()
-                );
+                print!("Failed to parse '{}' as '{}'. ", prop, std::any::type_name::<T>());
             }
         } else {
-            print!(
-                "There is no property '{}' in section '{}'. ",
-                property, section
-            );
+            print!("There is no property '{}' in section '{}'. ", property, section);
         }
     } else {
         print!("There is no section '{}'. ", section)
@@ -227,8 +212,5 @@ fn read_from_ini<T: std::fmt::Debug + std::str::FromStr>(
 }
 
 fn load_level_packages() -> Vec<String> {
-    LEVEL_INI
-        .sections()
-        .filter_map(|x| x.map(|x| x.into()))
-        .collect()
+    LEVEL_INI.sections().filter_map(|x| x.map(|x| x.into())).collect()
 }

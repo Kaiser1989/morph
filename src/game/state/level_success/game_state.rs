@@ -36,11 +36,7 @@ impl LevelSuccessState {
         let gui = Gui::new();
         let mut events = Events::new();
         let reader = events.register();
-        LevelSuccessState {
-            gui,
-            events,
-            reader,
-        }
+        LevelSuccessState { gui, events, reader }
     }
 }
 

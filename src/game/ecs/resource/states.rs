@@ -76,64 +76,30 @@ impl MorphState {
     #[inline]
     pub fn velocity_limit(&self) -> VelocityLimit {
         match self {
-            MorphState::Metal => VelocityLimit::new(
-                CONFIG.morph_max_velocity_metal,
-                CONFIG.morph_max_angular_velocity_metal,
-            ),
-            MorphState::Rubber => VelocityLimit::new(
-                CONFIG.morph_max_velocity_rubber,
-                CONFIG.morph_max_angular_velocity_rubber,
-            ),
-            MorphState::Water => VelocityLimit::new(
-                CONFIG.morph_max_velocity_water,
-                CONFIG.morph_max_angular_velocity_water,
-            ),
-            MorphState::Bubble => VelocityLimit::new(
-                CONFIG.morph_max_velocity_bubble,
-                CONFIG.morph_max_angular_velocity_bubble,
-            ),
+            MorphState::Metal => VelocityLimit::new(CONFIG.morph_max_velocity_metal, CONFIG.morph_max_angular_velocity_metal),
+            MorphState::Rubber => VelocityLimit::new(CONFIG.morph_max_velocity_rubber, CONFIG.morph_max_angular_velocity_rubber),
+            MorphState::Water => VelocityLimit::new(CONFIG.morph_max_velocity_water, CONFIG.morph_max_angular_velocity_water),
+            MorphState::Bubble => VelocityLimit::new(CONFIG.morph_max_velocity_bubble, CONFIG.morph_max_angular_velocity_bubble),
         }
     }
 
     #[inline]
     pub fn velocity_damping(&self) -> VelocityDamping {
         match self {
-            MorphState::Metal => VelocityDamping::new(
-                CONFIG.morph_air_friction_metal,
-                CONFIG.morph_angular_damping_metal,
-            ),
-            MorphState::Rubber => VelocityDamping::new(
-                CONFIG.morph_air_friction_rubber,
-                CONFIG.morph_angular_damping_rubber,
-            ),
-            MorphState::Water => VelocityDamping::new(
-                CONFIG.morph_air_friction_water,
-                CONFIG.morph_angular_damping_water,
-            ),
-            MorphState::Bubble => VelocityDamping::new(
-                CONFIG.morph_air_friction_bubble,
-                CONFIG.morph_angular_damping_bubble,
-            ),
+            MorphState::Metal => VelocityDamping::new(CONFIG.morph_air_friction_metal, CONFIG.morph_angular_damping_metal),
+            MorphState::Rubber => VelocityDamping::new(CONFIG.morph_air_friction_rubber, CONFIG.morph_angular_damping_rubber),
+            MorphState::Water => VelocityDamping::new(CONFIG.morph_air_friction_water, CONFIG.morph_angular_damping_water),
+            MorphState::Bubble => VelocityDamping::new(CONFIG.morph_air_friction_bubble, CONFIG.morph_angular_damping_bubble),
         }
     }
 
     #[inline]
     pub fn mass(&self) -> Mass {
         match self {
-            MorphState::Metal => {
-                Mass::new(CONFIG.morph_mass_metal, CONFIG.morph_angular_inertia_metal)
-            }
-            MorphState::Rubber => Mass::new(
-                CONFIG.morph_mass_rubber,
-                CONFIG.morph_angular_inertia_rubber,
-            ),
-            MorphState::Water => {
-                Mass::new(CONFIG.morph_mass_water, CONFIG.morph_angular_inertia_water)
-            }
-            MorphState::Bubble => Mass::new(
-                CONFIG.morph_mass_bubble,
-                CONFIG.morph_angular_inertia_bubble,
-            ),
+            MorphState::Metal => Mass::new(CONFIG.morph_mass_metal, CONFIG.morph_angular_inertia_metal),
+            MorphState::Rubber => Mass::new(CONFIG.morph_mass_rubber, CONFIG.morph_angular_inertia_rubber),
+            MorphState::Water => Mass::new(CONFIG.morph_mass_water, CONFIG.morph_angular_inertia_water),
+            MorphState::Bubble => Mass::new(CONFIG.morph_mass_bubble, CONFIG.morph_angular_inertia_bubble),
         }
     }
 
@@ -150,22 +116,10 @@ impl MorphState {
     #[inline]
     pub fn material(&self) -> Material {
         match self {
-            MorphState::Metal => Material::new(
-                CONFIG.morph_bounce_metal,
-                CONFIG.morph_ground_friction_metal,
-            ),
-            MorphState::Rubber => Material::new(
-                CONFIG.morph_bounce_rubber,
-                CONFIG.morph_ground_friction_rubber,
-            ),
-            MorphState::Water => Material::new(
-                CONFIG.morph_bounce_water,
-                CONFIG.morph_ground_friction_water,
-            ),
-            MorphState::Bubble => Material::new(
-                CONFIG.morph_bounce_bubble,
-                CONFIG.morph_ground_friction_bubble,
-            ),
+            MorphState::Metal => Material::new(CONFIG.morph_bounce_metal, CONFIG.morph_ground_friction_metal),
+            MorphState::Rubber => Material::new(CONFIG.morph_bounce_rubber, CONFIG.morph_ground_friction_rubber),
+            MorphState::Water => Material::new(CONFIG.morph_bounce_water, CONFIG.morph_ground_friction_water),
+            MorphState::Bubble => Material::new(CONFIG.morph_bounce_bubble, CONFIG.morph_ground_friction_bubble),
         }
     }
 
@@ -253,16 +207,9 @@ impl Role {
             ),
             Role::Grid => (
                 CONFIG.physic_group_object,
-                vec![
-                    MorphState::Metal.collision().group,
-                    MorphState::Rubber.collision().group,
-                    CONFIG.physic_group_particle,
-                ],
+                vec![MorphState::Metal.collision().group, MorphState::Rubber.collision().group, CONFIG.physic_group_particle],
             ),
-            Role::Particle => (
-                CONFIG.physic_group_particle,
-                vec![CONFIG.physic_group_object],
-            ),
+            Role::Particle => (CONFIG.physic_group_particle, vec![CONFIG.physic_group_object]),
             _ => (CONFIG.physic_group_object, vec![]),
         };
         Collision::new(group, with)
@@ -279,14 +226,8 @@ impl Role {
                     MorphState::Water.sensor().group,
                     MorphState::Bubble.sensor().group,
                 ],
-                Role::Spikes => vec![
-                    MorphState::Rubber.sensor().group,
-                    MorphState::Bubble.sensor().group,
-                ],
-                Role::Grid => vec![
-                    MorphState::Water.sensor().group,
-                    MorphState::Bubble.sensor().group,
-                ],
+                Role::Spikes => vec![MorphState::Rubber.sensor().group, MorphState::Bubble.sensor().group],
+                Role::Grid => vec![MorphState::Water.sensor().group, MorphState::Bubble.sensor().group],
                 _ => vec![],
             },
         )

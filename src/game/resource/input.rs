@@ -37,50 +37,41 @@ impl InputContext {
         self.back = false;
 
         // process inputs
-        input_events
-            .iter()
-            .for_each(|input_event| match input_event {
-                InputEvent::Cursor(CursorEvent { location }) => {
-                    self.cursor_location = vec2(
-                        location.x / self.resolution.x,
-                        1.0 - location.y / self.resolution.y,
-                    );
+        input_events.iter().for_each(|input_event| match input_event {
+            InputEvent::Cursor(CursorEvent { location }) => {
+                self.cursor_location = vec2(location.x / self.resolution.x, 1.0 - location.y / self.resolution.y);
+            }
+            InputEvent::Mouse(MouseEvent { state, button }) => match (state, button) {
+                (MouseState::Pressed, MouseButton::Left) => {
+                    self.press();
                 }
-                InputEvent::Mouse(MouseEvent { state, button }) => match (state, button) {
-                    (MouseState::Pressed, MouseButton::Left) => {
+                (MouseState::Released, MouseButton::Left) => {
+                    self.release();
+                }
+                _ => {}
+            },
+            InputEvent::Touch(TouchEvent { state, location, id: _ }) => {
+                self.cursor_location = vec2(location.x, location.y);
+                match state {
+                    TouchState::Down => {
                         self.press();
                     }
-                    (MouseState::Released, MouseButton::Left) => {
+                    TouchState::Up => {
                         self.release();
                     }
-                    _ => {}
-                },
-                InputEvent::Touch(TouchEvent {
-                    state,
-                    location,
-                    id: _,
-                }) => {
-                    self.cursor_location = vec2(location.x, location.y);
-                    match state {
-                        TouchState::Down => {
-                            self.press();
-                        }
-                        TouchState::Up => {
-                            self.release();
-                        }
-                        TouchState::Cancelled => {
-                            self.cancel();
-                        }
-                        _ => {}
+                    TouchState::Cancelled => {
+                        self.cancel();
                     }
+                    _ => {}
                 }
-                InputEvent::Keyboard(KeyboardEvent { state, key }) => match (state, key) {
-                    (KeyState::Released, Key::Back) => {
-                        self.back = true;
-                    }
-                    _ => {}
-                },
-            });
+            }
+            InputEvent::Keyboard(KeyboardEvent { state, key }) => match (state, key) {
+                (KeyState::Released, Key::Back) => {
+                    self.back = true;
+                }
+                _ => {}
+            },
+        });
     }
 
     pub fn change_resolution(&mut self, resolution: Vec2) {
@@ -114,10 +105,7 @@ impl InputContext {
         // (StartPositiion, Delta)
         if let Some(pressed_location) = self.pressed_location {
             if self.cursor_location != self.last_cursor_location {
-                return Some((
-                    pressed_location,
-                    self.cursor_location - self.last_cursor_location,
-                ));
+                return Some((pressed_location, self.cursor_location - self.last_cursor_location));
             }
         }
         None
@@ -135,9 +123,7 @@ impl InputContext {
 
     fn release(&mut self) {
         self.pressed = false;
-        if let (Some(pressed_location), Some(pressed_time)) =
-            (self.pressed_location, self.pressed_time)
-        {
+        if let (Some(pressed_location), Some(pressed_time)) = (self.pressed_location, self.pressed_time) {
             if self.valid_click_move(pressed_location) && self.valid_click_time(pressed_time) {
                 self.click = true;
             }

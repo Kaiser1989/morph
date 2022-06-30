@@ -34,11 +34,7 @@ impl MenuSettingsState {
         let gui = Gui::new();
         let mut events = Events::new();
         let reader = events.register();
-        MenuSettingsState {
-            gui,
-            events,
-            reader,
-        }
+        MenuSettingsState { gui, events, reader }
     }
 }
 

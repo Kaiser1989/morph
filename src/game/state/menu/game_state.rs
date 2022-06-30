@@ -36,11 +36,7 @@ impl MenuState {
         let gui = Gui::new();
         let mut events = Events::new();
         let reader = events.register();
-        MenuState {
-            gui,
-            events,
-            reader,
-        }
+        MenuState { gui, events, reader }
     }
 }
 

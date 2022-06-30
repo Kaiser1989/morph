@@ -56,57 +56,15 @@ impl<'a> System<'a> for LifetimeSystem {
         }
 
         // update comp inserts
-        update_insert(
-            &data.entities,
-            &data.lazy,
-            &data.time,
-            &mut data.opacity_anim,
-            &mut data.opacity_anim_insert,
-        );
+        update_insert(&data.entities, &data.lazy, &data.time, &mut data.opacity_anim, &mut data.opacity_anim_insert);
 
         // update comp removes
-        update_remove(
-            &data.entities,
-            &data.lazy,
-            &data.time,
-            &mut data.shape_anim,
-            &mut data.shape_anim_remove,
-        );
-        update_remove(
-            &data.entities,
-            &data.lazy,
-            &data.time,
-            &mut data.contact,
-            &mut data.contact_remove,
-        );
-        update_remove(
-            &data.entities,
-            &data.lazy,
-            &data.time,
-            &mut data.squeeze,
-            &mut data.squeeze_remove,
-        );
-        update_remove(
-            &data.entities,
-            &data.lazy,
-            &data.time,
-            &mut data.surprise,
-            &mut data.surprise_remove,
-        );
-        update_remove(
-            &data.entities,
-            &data.lazy,
-            &data.time,
-            &mut data.blink,
-            &mut data.blink_remove,
-        );
-        update_remove(
-            &data.entities,
-            &data.lazy,
-            &data.time,
-            &mut data.opacity_anim,
-            &mut data.opacity_anim_remove,
-        );
+        update_remove(&data.entities, &data.lazy, &data.time, &mut data.shape_anim, &mut data.shape_anim_remove);
+        update_remove(&data.entities, &data.lazy, &data.time, &mut data.contact, &mut data.contact_remove);
+        update_remove(&data.entities, &data.lazy, &data.time, &mut data.squeeze, &mut data.squeeze_remove);
+        update_remove(&data.entities, &data.lazy, &data.time, &mut data.surprise, &mut data.surprise_remove);
+        update_remove(&data.entities, &data.lazy, &data.time, &mut data.blink, &mut data.blink_remove);
+        update_remove(&data.entities, &data.lazy, &data.time, &mut data.opacity_anim, &mut data.opacity_anim_remove);
     }
 }
 
@@ -114,13 +72,8 @@ impl<'a> System<'a> for LifetimeSystem {
 // Helper
 
 #[inline]
-fn update_insert<C>(
-    entities: &Entities,
-    lazy: &Read<LazyUpdate>,
-    time: &Read<GameTime>,
-    comp_storage: &mut WriteStorage<C>,
-    insert_storage: &mut WriteStorage<Insert<C>>,
-) where
+fn update_insert<C>(entities: &Entities, lazy: &Read<LazyUpdate>, time: &Read<GameTime>, comp_storage: &mut WriteStorage<C>, insert_storage: &mut WriteStorage<Insert<C>>)
+where
     C: Component + Send + Sync,
 {
     for (entity, insert) in (entities, insert_storage).join() {
@@ -132,13 +85,8 @@ fn update_insert<C>(
 }
 
 #[inline]
-fn update_remove<C>(
-    entities: &Entities,
-    lazy: &Read<LazyUpdate>,
-    time: &Read<GameTime>,
-    comp_storage: &mut WriteStorage<C>,
-    remove_storage: &mut WriteStorage<Remove<C>>,
-) where
+fn update_remove<C>(entities: &Entities, lazy: &Read<LazyUpdate>, time: &Read<GameTime>, comp_storage: &mut WriteStorage<C>, remove_storage: &mut WriteStorage<Remove<C>>)
+where
     C: Component + Send + Sync,
 {
     for (entity, remove) in (entities, remove_storage).join() {

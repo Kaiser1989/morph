@@ -43,8 +43,7 @@ impl<'a> System<'a> for OutputSystem {
 
     fn run(&mut self, mut data: Self::SystemData) {
         // calculate masks
-        let morph_mask =
-            data.bubble.mask() | data.water.mask() | data.rubber.mask() | data.metal.mask();
+        let morph_mask = data.bubble.mask() | data.water.mask() | data.rubber.mask() | data.metal.mask();
 
         // morph finish => success
         for (_, _, _) in (&data.entities, &data.finish, &morph_mask).join() {

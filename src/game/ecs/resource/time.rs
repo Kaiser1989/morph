@@ -15,10 +15,7 @@ pub struct GameTime {
 
 impl GameTime {
     pub fn new(frame_time: f32, all_time: f32) -> GameTime {
-        GameTime {
-            frame_time,
-            all_time,
-        }
+        GameTime { frame_time, all_time }
     }
 
     pub fn update(&mut self, frame_time: f32) {

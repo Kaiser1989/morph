@@ -35,11 +35,7 @@ impl LevelFailureState {
         let gui = Gui::new();
         let mut events = Events::new();
         let reader = events.register();
-        LevelFailureState {
-            gui,
-            events,
-            reader,
-        }
+        LevelFailureState { gui, events, reader }
     }
 }
 

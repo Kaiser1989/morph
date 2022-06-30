@@ -48,40 +48,16 @@ impl<'a> System<'a> for AnimationSystem {
 
     fn run(&mut self, mut data: Self::SystemData) {
         // rotate animation
-        update_animation(
-            &data.entities,
-            &data.time,
-            &mut data.rotation,
-            &mut data.rotation_anim,
-            &mut data.rotation_anim_remove,
-        );
+        update_animation(&data.entities, &data.time, &mut data.rotation, &mut data.rotation_anim, &mut data.rotation_anim_remove);
 
         // shape animation
-        update_animation(
-            &data.entities,
-            &data.time,
-            &mut data.shape,
-            &mut data.shape_anim,
-            &mut data.shape_anim_remove,
-        );
+        update_animation(&data.entities, &data.time, &mut data.shape, &mut data.shape_anim, &mut data.shape_anim_remove);
 
         // texture slot animation
-        update_animation(
-            &data.entities,
-            &data.time,
-            &mut data.texture_slot,
-            &mut data.texture_slot_anim,
-            &mut data.texture_slot_anim_remove,
-        );
+        update_animation(&data.entities, &data.time, &mut data.texture_slot, &mut data.texture_slot_anim, &mut data.texture_slot_anim_remove);
 
         // opacity animation
-        update_animation(
-            &data.entities,
-            &data.time,
-            &mut data.opacity,
-            &mut data.opacity_anim,
-            &mut data.opacity_anim_remove,
-        );
+        update_animation(&data.entities, &data.time, &mut data.opacity, &mut data.opacity_anim, &mut data.opacity_anim_remove);
     }
 }
 
@@ -99,8 +75,7 @@ fn update_animation<C>(
     C: Animatable + Component + Send + Sync,
 {
     for (entity, mut anim) in (entities, anim_storage).join() {
-        let index =
-            clamp_scalar(anim.current / anim.duration, 0.0, 1.0) * (anim.frames.len() - 1) as f32;
+        let index = clamp_scalar(anim.current / anim.duration, 0.0, 1.0) * (anim.frames.len() - 1) as f32;
         let lower = anim.frames.get(index.floor() as usize).unwrap();
         let upper = anim.frames.get(index.ceil() as usize).unwrap();
         let comp = comp_storage.get_mut_or_default(entity).unwrap();

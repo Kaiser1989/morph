@@ -100,10 +100,7 @@ impl MorphInfo {
 
 impl TargetInfo {
     pub fn new() -> TargetInfo {
-        TargetInfo {
-            position: Vec2::zeros(),
-            layer: 0,
-        }
+        TargetInfo { position: Vec2::zeros(), layer: 0 }
     }
 }
 
@@ -137,11 +134,7 @@ impl LevelInfo {
 
 impl From<&str> for PackageInfo {
     fn from(package: &str) -> Self {
-        serde_json::from_str(
-            &File::load_string(&format!("level/{}/info.json", package))
-                .expect("Failed to load level info file"),
-        )
-        .expect("Failed to parse json")
+        serde_json::from_str(&File::load_string(&format!("level/{}/info.json", package)).expect("Failed to load level info file")).expect("Failed to parse json")
     }
 }
 

@@ -35,11 +35,7 @@ impl MenuPackageState {
         let gui = Gui::new();
         let mut events = Events::new();
         let reader = events.register();
-        MenuPackageState {
-            gui,
-            events,
-            reader,
-        }
+        MenuPackageState { gui, events, reader }
     }
 }
 

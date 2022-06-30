@@ -39,14 +39,7 @@ impl<'a> System<'a> for PhysicFollowSystem {
 
     fn run(&mut self, mut data: Self::SystemData) {
         // update follow (need special treatment)
-        for (entity, follow, follow_lag, follow_spring) in (
-            &data.entities,
-            &data.follow,
-            (&data.follow_lag).maybe(),
-            (&data.follow_spring).maybe(),
-        )
-            .join()
-        {
+        for (entity, follow, follow_lag, follow_spring) in (&data.entities, &data.follow, (&data.follow_lag).maybe(), (&data.follow_spring).maybe()).join() {
             // read data from physix
             let target_pos = data.physix.position(&follow.0);
             let mut entity_pos = data.physix.position(&entity);

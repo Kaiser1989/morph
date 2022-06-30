@@ -61,11 +61,7 @@ pub fn start() {
     let log_level = log::LevelFilter::Debug;
     #[cfg(not(debug_assertions))]
     let log_level = log::LevelFilter::Info;
-    match SimpleLogger::new()
-        .with_utc_timestamps()
-        .with_level(log_level)
-        .init()
-    {
+    match SimpleLogger::new().with_utc_timestamps().with_level(log_level).init() {
         Err(s) => println!("{}", s),
         _ => {}
     }
@@ -167,8 +163,7 @@ impl Runner for GameManager {
                 StateEvent::LoadPackage(package) => {
                     info!("StateEvent: LoadPackage({})", &package);
                     self.resource.load_package(&package);
-                    self.graphics
-                        .load_package_textures(self.resource.package_info().unwrap());
+                    self.graphics.load_package_textures(self.resource.package_info().unwrap());
                 }
                 StateEvent::UnloadPackage => {
                     info!("StateEvent: UnloadPackage");
@@ -204,11 +199,9 @@ impl Runner for GameManager {
         // find all states to be drawn
         let draw_index = self.states.iter().rposition(|state| !state.parent_draw());
         let graphics = &mut self.graphics;
-        (&mut self.states[draw_index.unwrap_or(0)..])
-            .iter_mut()
-            .for_each(|state| {
-                state.draw(graphics);
-            });
+        (&mut self.states[draw_index.unwrap_or(0)..]).iter_mut().for_each(|state| {
+            state.draw(graphics);
+        });
     }
 
     fn create_device(&mut self, gl: &Gl) {

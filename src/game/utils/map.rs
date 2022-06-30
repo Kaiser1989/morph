@@ -50,9 +50,7 @@ where
      * Create a new empty SortedMap
      */
     pub fn new() -> SortedMap<K, V> {
-        SortedMap {
-            entries: Vec::new(),
-        }
+        SortedMap { entries: Vec::new() }
     }
 
     /**
@@ -92,9 +90,7 @@ where
      * Check if this map contains a value for given key
      */
     pub fn contains(&self, key: &K) -> bool {
-        self.entries
-            .binary_search_by(|(k, _)| k.key_cmp(key))
-            .is_ok()
+        self.entries.binary_search_by(|(k, _)| k.key_cmp(key)).is_ok()
     }
 
     /**
@@ -228,10 +224,7 @@ where
      */
     pub fn sub(&self, key_min: &K, key_max: &K) -> &[(K, V)] {
         assert!(key_min.key_cmp(key_max) != Ordering::Greater);
-        match (
-            self.entries.binary_search_by(|(k, _)| k.key_cmp(key_min)),
-            self.entries.binary_search_by(|(k, _)| k.key_cmp(key_max)),
-        ) {
+        match (self.entries.binary_search_by(|(k, _)| k.key_cmp(key_min)), self.entries.binary_search_by(|(k, _)| k.key_cmp(key_max))) {
             (Ok(index_min), Ok(index_max)) => &self.entries[index_min..index_max],
             (Ok(index_min), Err(index_max)) => &self.entries[index_min..index_max],
             (Err(index_min), Ok(index_max)) => &self.entries[index_min..index_max],
@@ -263,8 +256,7 @@ where
      */
     fn sort(&mut self) {
         self.entries.sort_by(|(k0, _), (k1, _)| k0.key_cmp(k1));
-        self.entries
-            .dedup_by(|(k0, _), (k1, _)| k1.key_cmp(k0) == Ordering::Equal);
+        self.entries.dedup_by(|(k0, _), (k1, _)| k1.key_cmp(k0) == Ordering::Equal);
     }
 
     /**
@@ -423,10 +415,7 @@ where
      */
     pub fn sub(&self, min: &K, max: &K) -> &[K] {
         assert!(min.key_cmp(max) != Ordering::Greater);
-        match (
-            self.entries.binary_search_by(|k| k.key_cmp(min)),
-            self.entries.binary_search_by(|k| k.key_cmp(max)),
-        ) {
+        match (self.entries.binary_search_by(|k| k.key_cmp(min)), self.entries.binary_search_by(|k| k.key_cmp(max))) {
             (Ok(index_min), Ok(index_max)) => &self.entries[index_min..index_max],
             (Ok(index_min), Err(index_max)) => &self.entries[index_min..index_max],
             (Err(index_min), Ok(index_max)) => &self.entries[index_min..index_max],
@@ -461,8 +450,7 @@ where
      */
     fn sort(&mut self) {
         self.entries.sort_by(|k0, k1| k0.key_cmp(k1));
-        self.entries
-            .dedup_by(|k0, k1| k1.key_cmp(k0) == Ordering::Equal);
+        self.entries.dedup_by(|k0, k1| k1.key_cmp(k0) == Ordering::Equal);
     }
 
     /**

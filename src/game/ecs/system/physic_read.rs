@@ -45,20 +45,7 @@ impl<'a> System<'a> for PhysicReadSystem {
 
     fn run(&mut self, mut data: Self::SystemData) {
         // update ECS => Physix
-        for (
-            entity,
-            _,
-            position,
-            rotation,
-            velocity,
-            velocity_limit,
-            velocity_damping,
-            mass,
-            shape,
-            material,
-            collision,
-            sensor,
-        ) in (
+        for (entity, _, position, rotation, velocity, velocity_limit, velocity_damping, mass, shape, material, collision, sensor) in (
             &data.entities,
             &data.physic,
             &data.position,
@@ -79,8 +66,7 @@ impl<'a> System<'a> for PhysicReadSystem {
             data.physix.update_rotation(&entity, rotation);
             data.physix.update_velocity(&entity, velocity);
             data.physix.update_velocity_limit(&entity, velocity_limit);
-            data.physix
-                .update_velocity_damping(&entity, velocity_damping);
+            data.physix.update_velocity_damping(&entity, velocity_damping);
             data.physix.update_mass(&entity, mass);
             data.physix.update_shape(&entity, shape);
             data.physix.update_material(&entity, material);

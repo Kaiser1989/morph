@@ -52,24 +52,12 @@ impl<'a> System<'a> for PhysicSyncSystem {
         }
 
         // add entities
-        for (entity, position, _) in (
-            &data.entities,
-            &data.position,
-            self.physic_tracker.inserted(),
-        )
-            .join()
-        {
+        for (entity, position, _) in (&data.entities, &data.position, self.physic_tracker.inserted()).join() {
             data.physix.insert(entity, position);
         }
 
         // update physic status
-        for (entity, _, _) in (
-            &data.entities,
-            &data.physic,
-            self.dynamic_tracker.inserted() | self.dynamic_tracker.removed(),
-        )
-            .join()
-        {
+        for (entity, _, _) in (&data.entities, &data.physic, self.dynamic_tracker.inserted() | self.dynamic_tracker.removed()).join() {
             let dynamic = data.dynamic.get(entity);
             data.physix.update_dynamic(&entity, dynamic);
         }

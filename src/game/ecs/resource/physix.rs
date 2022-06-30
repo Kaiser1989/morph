@@ -16,9 +16,8 @@ use nphysics2d::joint::DefaultJointConstraintSet;
 use nphysics2d::material::BasicMaterial;
 use nphysics2d::math::{Force, ForceType};
 use nphysics2d::object::{
-    Body, BodyPartHandle, BodyStatus, Collider as DefaultCollider,
-    ColliderDesc as DefaultColliderDesc, DefaultBodyHandle, DefaultBodySet, DefaultColliderHandle,
-    DefaultColliderSet, RigidBody as DefaultRigidBody, RigidBodyDesc as DefaultRigidBodyDesc,
+    Body, BodyPartHandle, BodyStatus, Collider as DefaultCollider, ColliderDesc as DefaultColliderDesc, DefaultBodyHandle, DefaultBodySet, DefaultColliderHandle, DefaultColliderSet,
+    RigidBody as DefaultRigidBody, RigidBodyDesc as DefaultRigidBodyDesc,
 };
 use nphysics2d::world::{DefaultGeometricalWorld, DefaultMechanicalWorld};
 use specs::prelude::*;
@@ -109,13 +108,8 @@ impl Physix {
     pub fn update(&mut self, elapsed_time: f32) {
         // update all physics with elapsed_time
         self.mechanical_world.set_timestep(elapsed_time);
-        self.mechanical_world.step(
-            &mut self.geometrical_world,
-            &mut self.body_set,
-            &mut self.collider_set,
-            &mut self.constraint_set,
-            &mut self.force_set,
-        );
+        self.mechanical_world
+            .step(&mut self.geometrical_world, &mut self.body_set, &mut self.collider_set, &mut self.constraint_set, &mut self.force_set);
     }
 
     pub fn update_interactions(&mut self) {
@@ -124,42 +118,21 @@ impl Physix {
             self.geometrical_world
                 .interaction_pairs(&self.collider_set, false)
                 .filter_map(|(_, collider1, _, collider2, action)| {
-                    let entity1 = *collider1
-                        .user_data()
-                        .unwrap()
-                        .downcast_ref::<Entity>()
-                        .unwrap();
-                    let entity2 = *collider2
-                        .user_data()
-                        .unwrap()
-                        .downcast_ref::<Entity>()
-                        .unwrap();
+                    let entity1 = *collider1.user_data().unwrap().downcast_ref::<Entity>().unwrap();
+                    let entity2 = *collider2.user_data().unwrap().downcast_ref::<Entity>().unwrap();
                     match action {
                         DefaultInteraction::Proximity(_, prox) => match prox {
-                            Proximity::Intersecting => {
-                                Some(Action::Sensor(SensorAction::Intersecting))
-                            }
-                            Proximity::WithinMargin => {
-                                Some(Action::Sensor(SensorAction::Intersecting))
-                            }
+                            Proximity::Intersecting => Some(Action::Sensor(SensorAction::Intersecting)),
+                            Proximity::WithinMargin => Some(Action::Sensor(SensorAction::Intersecting)),
                             Proximity::Disjoint => Some(Action::Sensor(SensorAction::Disjoint)),
                         },
-                        DefaultInteraction::Contact(_, manifold) if manifold.len() > 0 => manifold
-                            .deepest_contact()
-                            .map(|dc| dc.contact.normal.into_inner())
-                            .map(|normal| Action::Contact(normal)),
+                        DefaultInteraction::Contact(_, manifold) if manifold.len() > 0 => manifold.deepest_contact().map(|dc| dc.contact.normal.into_inner()).map(|normal| Action::Contact(normal)),
                         _ => None,
                     }
                     .map(|a| (entity1, entity2, a))
                 })
                 // duplicate interactions (e1, e2) => (e2, e1)
-                .flat_map(|(e1, e2, action)| {
-                    vec![
-                        (e1, Interaction { with: e2, action }),
-                        (e2, Interaction { with: e1, action }),
-                    ]
-                    .into_iter()
-                })
+                .flat_map(|(e1, e2, action)| vec![(e1, Interaction { with: e2, action }), (e2, Interaction { with: e1, action })].into_iter())
                 // sort by entity
                 .sorted_by_key(|t| t.0)
                 // group by entity to generate hashmap
@@ -180,36 +153,16 @@ impl Physix {
 
     pub fn insert(&mut self, entity: Entity, position: &Position) {
         // init body
-        let body_desc = RigidBodyDesc::new()
-            .status(BodyStatus::Static)
-            .translation(position.0)
-            .status(BodyStatus::Static)
-            .user_data(entity);
+        let body_desc = RigidBodyDesc::new().status(BodyStatus::Static).translation(position.0).status(BodyStatus::Static).user_data(entity);
         let shape = ShapeHandle::new(Ball::new(0.0));
-        let contact_desc = ColliderDesc::new(shape.clone())
-            .collision_groups(CollisionGroups::empty())
-            .user_data(entity);
-        let sensor_desc = ColliderDesc::new(shape.clone())
-            .collision_groups(CollisionGroups::empty())
-            .sensor(true)
-            .user_data(entity);
+        let contact_desc = ColliderDesc::new(shape.clone()).collision_groups(CollisionGroups::empty()).user_data(entity);
+        let sensor_desc = ColliderDesc::new(shape.clone()).collision_groups(CollisionGroups::empty()).sensor(true).user_data(entity);
         // only add to body set, leave colliders unintialized
         let body = self.body_set.insert(body_desc.build());
-        let contact = self
-            .collider_set
-            .insert(contact_desc.build(BodyPartHandle(body, 0)));
-        let sensor = self
-            .collider_set
-            .insert(sensor_desc.build(BodyPartHandle(body, 0)));
+        let contact = self.collider_set.insert(contact_desc.build(BodyPartHandle(body, 0)));
+        let sensor = self.collider_set.insert(sensor_desc.build(BodyPartHandle(body, 0)));
         // create handle
-        self.entities.insert(
-            entity,
-            PhysixHandle {
-                body,
-                contact,
-                sensor,
-            },
-        );
+        self.entities.insert(entity, PhysixHandle { body, contact, sensor });
     }
 
     pub fn remove(&mut self, entity: &Entity) {
@@ -253,19 +206,12 @@ impl Physix {
 
     pub fn update_rotation(&mut self, entity: &Entity, rotation: &Rotation) {
         let body = self.body_mut(entity);
-        body.set_position(Isometry2::new(
-            body.position().translation.vector,
-            rotation.0,
-        ));
+        body.set_position(Isometry2::new(body.position().translation.vector, rotation.0));
     }
 
     pub fn update_dynamic(&mut self, entity: &Entity, dynamic: Option<&Dynamic>) {
         let body = self.body_mut(entity);
-        body.set_status(if dynamic.is_some() {
-            BodyStatus::Dynamic
-        } else {
-            BodyStatus::Static
-        });
+        body.set_status(if dynamic.is_some() { BodyStatus::Dynamic } else { BodyStatus::Static });
     }
 
     pub fn velocity(&self, entity: &Entity) -> Velocity {
@@ -283,11 +229,7 @@ impl Physix {
         }
     }
 
-    pub fn update_velocity_limit(
-        &mut self,
-        entity: &Entity,
-        velocity_limit: Option<&VelocityLimit>,
-    ) {
+    pub fn update_velocity_limit(&mut self, entity: &Entity, velocity_limit: Option<&VelocityLimit>) {
         let body = self.body_mut(entity);
         if let Some(velocity_limit) = velocity_limit {
             body.set_max_linear_velocity(velocity_limit.0);
@@ -298,11 +240,7 @@ impl Physix {
         }
     }
 
-    pub fn update_velocity_damping(
-        &mut self,
-        entity: &Entity,
-        velocity_damping: Option<&VelocityDamping>,
-    ) {
+    pub fn update_velocity_damping(&mut self, entity: &Entity, velocity_damping: Option<&VelocityDamping>) {
         let body = self.body_mut(entity);
         if let Some(velocity_damping) = velocity_damping {
             body.set_linear_damping(velocity_damping.0);
@@ -316,12 +254,7 @@ impl Physix {
     pub fn update_acceleration(&mut self, entity: &Entity, acceleration: Option<&Acceleration>) {
         if let Some(acceleration) = acceleration {
             let body = self.body_mut(entity);
-            body.apply_force(
-                0,
-                &Force::new(acceleration.0, acceleration.1),
-                ForceType::AccelerationChange,
-                true,
-            );
+            body.apply_force(0, &Force::new(acceleration.0, acceleration.1), ForceType::AccelerationChange, true);
         }
     }
 
@@ -354,64 +287,38 @@ impl Physix {
 
     pub fn update_material(&mut self, entity: &Entity, material: Option<&Material>) {
         if let Some(material) = material {
-            *self
-                .contact_mut(entity)
-                .material_mut()
-                .downcast_mut()
-                .unwrap() = BasicMaterial::new(material.0, material.1);
+            *self.contact_mut(entity).material_mut().downcast_mut().unwrap() = BasicMaterial::new(material.0, material.1);
         } else {
-            *self
-                .contact_mut(entity)
-                .material_mut()
-                .downcast_mut()
-                .unwrap() = BasicMaterial::default();
+            *self.contact_mut(entity).material_mut().downcast_mut().unwrap() = BasicMaterial::default();
         }
     }
 
     pub fn update_collision(&mut self, entity: &Entity, collision: Option<&Collision>) {
         if let Some(collision) = collision {
-            self.contact_mut(entity).set_collision_groups(
-                CollisionGroups::new()
-                    .with_membership(&[collision.group])
-                    .with_whitelist(&collision.with),
-            );
-        } else {
             self.contact_mut(entity)
-                .set_collision_groups(CollisionGroups::empty());
+                .set_collision_groups(CollisionGroups::new().with_membership(&[collision.group]).with_whitelist(&collision.with));
+        } else {
+            self.contact_mut(entity).set_collision_groups(CollisionGroups::empty());
         }
     }
 
     pub fn update_sensor(&mut self, entity: &Entity, sensor: Option<&Sensor>) {
         if let Some(sensor) = sensor {
-            self.sensor_mut(entity).set_collision_groups(
-                CollisionGroups::new()
-                    .with_membership(&[sensor.group])
-                    .with_whitelist(&sensor.with),
-            );
-        } else {
             self.sensor_mut(entity)
-                .set_collision_groups(CollisionGroups::empty());
+                .set_collision_groups(CollisionGroups::new().with_membership(&[sensor.group]).with_whitelist(&sensor.with));
+        } else {
+            self.sensor_mut(entity).set_collision_groups(CollisionGroups::empty());
         }
     }
 
     pub fn apply_force_acc(&mut self, entity: &Entity, linear: Vec2, angular: f32) {
         let body = self.body_mut(entity);
-        body.apply_force(
-            0,
-            &Force::new(linear, angular),
-            ForceType::AccelerationChange,
-            true,
-        );
+        body.apply_force(0, &Force::new(linear, angular), ForceType::AccelerationChange, true);
     }
 
     pub fn apply_force_vel(&mut self, entity: &Entity, linear: Vec2, angular: f32) {
         let body = self.body_mut(entity);
-        body.apply_force(
-            0,
-            &Force::new(linear, angular),
-            ForceType::VelocityChange,
-            true,
-        );
+        body.apply_force(0, &Force::new(linear, angular), ForceType::VelocityChange, true);
     }
 
     // #[inline]
@@ -470,32 +377,24 @@ impl Physix {
     #[inline]
     fn body(&self, entity: &Entity) -> &RigidBody {
         let handle = self.entities.get(entity).expect("Entity not found");
-        self.body_set
-            .rigid_body(handle.body)
-            .expect("Body not found")
+        self.body_set.rigid_body(handle.body).expect("Body not found")
     }
 
     #[inline]
     fn body_mut(&mut self, entity: &Entity) -> &mut RigidBody {
         let handle = self.entities.get(entity).expect("Entity not found");
-        self.body_set
-            .rigid_body_mut(handle.body)
-            .expect("Body not found")
+        self.body_set.rigid_body_mut(handle.body).expect("Body not found")
     }
 
     #[inline]
     fn contact_mut(&mut self, entity: &Entity) -> &mut Collider {
         let handle = self.entities.get(entity).expect("Entity not found");
-        self.collider_set
-            .get_mut(handle.contact)
-            .expect("Collider not found")
+        self.collider_set.get_mut(handle.contact).expect("Collider not found")
     }
 
     #[inline]
     fn sensor_mut(&mut self, entity: &Entity) -> &mut Collider {
         let handle = self.entities.get(entity).expect("Entity not found");
-        self.collider_set
-            .get_mut(handle.sensor)
-            .expect("Sensor not found")
+        self.collider_set.get_mut(handle.sensor).expect("Sensor not found")
     }
 }

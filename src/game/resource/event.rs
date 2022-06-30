@@ -106,10 +106,7 @@ where
         self.inserted.clear();
         self.removed.clear();
         // add events
-        for event in storage
-            .channel()
-            .read(&mut self.reader.as_mut().expect("Tacker must be initialized"))
-        {
+        for event in storage.channel().read(&mut self.reader.as_mut().expect("Tacker must be initialized")) {
             match event {
                 ComponentEvent::Inserted(id) => {
                     self.inserted.add(*id);

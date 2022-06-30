@@ -59,16 +59,10 @@ impl<'a> System<'a> for StoryInteractionSystem {
 
     fn run(&mut self, mut data: Self::SystemData) {
         // calculate masks
-        let morph_mask =
-            data.bubble.mask() | data.water.mask() | data.rubber.mask() | data.metal.mask();
+        let morph_mask = data.bubble.mask() | data.water.mask() | data.rubber.mask() | data.metal.mask();
 
         // update morph iteractions
-        for (entity, _) in (
-            &data.entities,
-            morph_mask & data.physix.interaction_tracker(),
-        )
-            .join()
-        {
+        for (entity, _) in (&data.entities, morph_mask & data.physix.interaction_tracker()).join() {
             for interaction in data.physix.interactions(&entity) {
                 match interaction.action {
                     Action::Sensor(SensorAction::Intersecting) => {
@@ -111,8 +105,7 @@ impl<'a> System<'a> for StoryInteractionSystem {
                             let impulse = velocity.0 * mass.0;
                             let normal_impulse = project(&impulse, &normal);
                             data.contact.insert(entity, Contact::new(normal_impulse));
-                            data.contact_remove
-                                .insert(entity, Remove::new(&data.time, 0.01));
+                            data.contact_remove.insert(entity, Remove::new(&data.time, 0.01));
                         }
 
                         // Morph-Breakable-Contact
@@ -123,14 +116,11 @@ impl<'a> System<'a> for StoryInteractionSystem {
                             let impulse = velocity.0 * mass.0;
                             let normal_impulse = project(&impulse, &normal);
                             data.contact.insert(entity, Contact::new(normal_impulse));
-                            data.contact_remove
-                                .insert(entity, Remove::new(&data.time, 0.01));
+                            data.contact_remove.insert(entity, Remove::new(&data.time, 0.01));
                             // add contact to breakable if metal or rubber
                             if data.rubber.contains(entity) || data.metal.contains(entity) {
-                                data.contact
-                                    .insert(interaction.with, Contact::new(normal_impulse));
-                                data.contact_remove
-                                    .insert(interaction.with, Remove::new(&data.time, 0.01));
+                                data.contact.insert(interaction.with, Contact::new(normal_impulse));
+                                data.contact_remove.insert(interaction.with, Remove::new(&data.time, 0.01));
                             }
                         }
                     }

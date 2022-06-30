@@ -40,10 +40,7 @@ pub struct Opacity(pub f32);
 
 impl Camera {
     pub fn new(zoom: f32, max_dimension: Vec2) -> Camera {
-        Camera {
-            zoom,
-            max_dimension,
-        }
+        Camera { zoom, max_dimension }
     }
 }
 

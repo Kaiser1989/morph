@@ -35,11 +35,7 @@ impl MenuPackageLevelState {
         let gui = Gui::new();
         let mut events = Events::new();
         let reader = events.register();
-        MenuPackageLevelState {
-            gui,
-            events,
-            reader,
-        }
+        MenuPackageLevelState { gui, events, reader }
     }
 }
 

@@ -76,28 +76,15 @@ impl<'a> System<'a> for StoryMorphSystem {
         self.burst_tracker.update(&data.burst);
 
         // calculate masks
-        let morph_mask =
-            data.bubble.mask() | data.water.mask() | data.rubber.mask() | data.metal.mask();
+        let morph_mask = data.bubble.mask() | data.water.mask() | data.rubber.mask() | data.metal.mask();
 
         // handle slow insertion
-        for (_, velocity_limit, _) in (
-            &data.entities,
-            &mut data.velocity_limit,
-            &morph_mask & self.slow_tracker.inserted(),
-        )
-            .join()
-        {
+        for (_, velocity_limit, _) in (&data.entities, &mut data.velocity_limit, &morph_mask & self.slow_tracker.inserted()).join() {
             velocity_limit.0 = CONFIG.physic_grid_max_velocity;
         }
 
         // handle slow removing
-        for (entity, velocity_limit, _) in (
-            &data.entities,
-            &mut data.velocity_limit,
-            &morph_mask & self.slow_tracker.removed(),
-        )
-            .join()
-        {
+        for (entity, velocity_limit, _) in (&data.entities, &mut data.velocity_limit, &morph_mask & self.slow_tracker.removed()).join() {
             if data.bubble.contains(entity) {
                 *velocity_limit = MorphState::Bubble.velocity_limit();
             }
@@ -132,8 +119,7 @@ impl<'a> System<'a> for StoryMorphSystem {
         // handle finish insertion
         for (entity, _) in (&data.entities, &morph_mask & self.finish_tracker.inserted()).join() {
             data.dynamic.remove(entity);
-            data.follow
-                .insert(entity, Follow(data.actors.portal.unwrap()));
+            data.follow.insert(entity, Follow(data.actors.portal.unwrap()));
             data.follow_spring.insert(entity, FollowSpring(35.0, 5.0));
         }
     }

@@ -52,17 +52,8 @@ where
         }
     }
 
-    pub fn with_kind(
-        frames: SmallVec<[C; MAX_ANIMATION_ITEMS]>,
-        duration: f32,
-        kind: AnimationKind,
-    ) -> Animation<C> {
-        Animation {
-            frames,
-            duration,
-            current: 0.0,
-            kind,
-        }
+    pub fn with_kind(frames: SmallVec<[C; MAX_ANIMATION_ITEMS]>, duration: f32, kind: AnimationKind) -> Animation<C> {
+        Animation { frames, duration, current: 0.0, kind }
     }
 }
 

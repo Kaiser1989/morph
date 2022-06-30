@@ -49,14 +49,8 @@ impl<'a> System<'a> for StoryObjectAnimationSystem {
         // breakable broken animation
         for (entity, _) in (&data.entities, self.broken_tracker.inserted()).join() {
             data.opacity.insert(entity, Opacity::new(1.0));
-            data.opacity_anim_insert.insert(
-                entity,
-                Insert::new(
-                    Animation::new(smallvec![Opacity::new(1.0), Opacity::new(0.0)], 0.25),
-                    &data.time,
-                    1.25,
-                ),
-            );
+            data.opacity_anim_insert
+                .insert(entity, Insert::new(Animation::new(smallvec![Opacity::new(1.0), Opacity::new(0.0)], 0.25), &data.time, 1.25));
         }
     }
 }

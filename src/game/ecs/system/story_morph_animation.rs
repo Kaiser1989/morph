@@ -88,16 +88,12 @@ impl<'a> System<'a> for StoryMorphAnimationSystem {
         self.burst_tracker.update(&data.burst);
 
         // calculate masks
-        let morph_mask =
-            data.bubble.mask() | data.water.mask() | data.rubber.mask() | data.metal.mask();
+        let morph_mask = data.bubble.mask() | data.water.mask() | data.rubber.mask() | data.metal.mask();
 
         // morph change animation
         for (morph_entity, _) in (
             &data.entities,
-            self.bubble_tracker.inserted()
-                | self.water_tracker.inserted()
-                | self.rubber_tracker.inserted()
-                | self.metal_tracker.inserted(),
+            self.bubble_tracker.inserted() | self.water_tracker.inserted() | self.rubber_tracker.inserted() | self.metal_tracker.inserted(),
         )
             .join()
         {
@@ -113,57 +109,26 @@ impl<'a> System<'a> for StoryMorphAnimationSystem {
             data.position.insert(entity, morph_position);
             data.shape.insert(entity, morph_shape * 1.5);
             data.texture.insert(entity, Texture::new(TEX_GAME_MORPH));
-            data.texture_slot_anim.insert(
-                entity,
-                Animation::new(
-                    smallvec![TextureSlot::new(0.0), TextureSlot::new(15.0)],
-                    0.25,
-                ),
-            );
-            data.layer
-                .insert(entity, Layer::new(Plane::View, morph_layer.rank - 1));
-            data.lifetime
-                .insert(entity, Lifetime::new(&data.time, 0.25));
+            data.texture_slot_anim.insert(entity, Animation::new(smallvec![TextureSlot::new(0.0), TextureSlot::new(15.0)], 0.25));
+            data.layer.insert(entity, Layer::new(Plane::View, morph_layer.rank - 1));
+            data.lifetime.insert(entity, Lifetime::new(&data.time, 0.25));
         }
 
         // morph burst animation
         for (entity, _) in (&data.entities, self.burst_tracker.inserted()).join() {
             // bubble
             if data.bubble.contains(entity) {
-                data.texture
-                    .insert(entity, Texture::new(TEX_GAME_BUBBLE_BURST));
-                data.texture_slot_anim.insert(
-                    entity,
-                    Animation::new(
-                        smallvec![TextureSlot::new(0.0), TextureSlot::new(8.0)],
-                        0.25,
-                    ),
-                );
+                data.texture.insert(entity, Texture::new(TEX_GAME_BUBBLE_BURST));
+                data.texture_slot_anim.insert(entity, Animation::new(smallvec![TextureSlot::new(0.0), TextureSlot::new(8.0)], 0.25));
             }
 
             // rubber
             if data.rubber.contains(entity) {
-                data.texture
-                    .insert(entity, Texture::new(TEX_GAME_RUBBER_BURST));
-                data.texture_slot_anim.insert(
-                    entity,
-                    Animation::new(
-                        smallvec![TextureSlot::new(0.0), TextureSlot::new(5.0)],
-                        0.30,
-                    ),
-                );
+                data.texture.insert(entity, Texture::new(TEX_GAME_RUBBER_BURST));
+                data.texture_slot_anim.insert(entity, Animation::new(smallvec![TextureSlot::new(0.0), TextureSlot::new(5.0)], 0.30));
                 data.rotation_anim.insert(
                     entity,
-                    Animation::with_kind(
-                        smallvec![
-                            Rotation::new(0.0),
-                            Rotation::new(0.8),
-                            Rotation::new(-0.8),
-                            Rotation::new(0.0)
-                        ],
-                        1.2,
-                        AnimationKind::Repeat,
-                    ),
+                    Animation::with_kind(smallvec![Rotation::new(0.0), Rotation::new(0.8), Rotation::new(-0.8), Rotation::new(0.0)], 1.2, AnimationKind::Repeat),
                 );
             }
         }
@@ -171,10 +136,7 @@ impl<'a> System<'a> for StoryMorphAnimationSystem {
         // morph finish animation
         for (entity, _) in (&data.entities, &morph_mask & self.finish_tracker.inserted()).join() {
             let current_shape = *data.shape.get(entity).unwrap();
-            data.shape_anim.insert(
-                entity,
-                Animation::new(smallvec![current_shape, Shape::Ball(0.0)], 2.0),
-            );
+            data.shape_anim.insert(entity, Animation::new(smallvec![current_shape, Shape::Ball(0.0)], 2.0));
         }
 
         // morph face animations
@@ -186,20 +148,17 @@ impl<'a> System<'a> for StoryMorphAnimationSystem {
             // (velocity linear)
             if length2(&morph_velocity.0) > 24.9 {
                 data.surprise.insert(entity, Surprise);
-                data.surprise_remove
-                    .insert(entity, Remove::new(&data.time, 0.01));
+                data.surprise_remove.insert(entity, Remove::new(&data.time, 0.01));
             }
             // (velocity angular)
             if morph_velocity.1 > 2.0 {
                 data.surprise.insert(entity, Surprise);
-                data.surprise_remove
-                    .insert(entity, Remove::new(&data.time, 0.01));
+                data.surprise_remove.insert(entity, Remove::new(&data.time, 0.01));
             }
             // (acceleration)
             if data.acceleration.contains(entity) {
                 data.surprise.insert(entity, Surprise);
-                data.surprise_remove
-                    .insert(entity, Remove::new(&data.time, 0.01));
+                data.surprise_remove.insert(entity, Remove::new(&data.time, 0.01));
             }
 
             // squeeze animation
@@ -210,38 +169,31 @@ impl<'a> System<'a> for StoryMorphAnimationSystem {
             // (bounce)
             if length2(&morph_velocity.0) > 4.0 && data.contact.contains(entity) {
                 data.squeeze.insert(entity, Squeeze);
-                data.squeeze_remove
-                    .insert(entity, Remove::new(&data.time, 0.3));
+                data.squeeze_remove.insert(entity, Remove::new(&data.time, 0.3));
             }
             // (slow)
             if data.slow.contains(entity) {
                 data.squeeze.insert(entity, Squeeze);
-                data.squeeze_remove
-                    .insert(entity, Remove::new(&data.time, 0.01));
+                data.squeeze_remove.insert(entity, Remove::new(&data.time, 0.01));
             }
 
             // blink animation
             if (data.time.all_time * 10.0) as i32 % 30 == 0 {
                 data.blink.insert(entity, Blink);
-                data.blink_remove
-                    .insert(entity, Remove::new(&data.time, 0.1));
+                data.blink_remove.insert(entity, Remove::new(&data.time, 0.1));
             } else {
                 data.blink.remove(entity);
             }
 
             // update morph face
             if data.squeeze.contains(entity) {
-                data.texture_slot
-                    .insert(entity, TextureSlot::new(SLOT_MORPH_SQUEEZE));
+                data.texture_slot.insert(entity, TextureSlot::new(SLOT_MORPH_SQUEEZE));
             } else if data.surprise.contains(entity) {
-                data.texture_slot
-                    .insert(entity, TextureSlot::new(SLOT_MORPH_SURPRISE));
+                data.texture_slot.insert(entity, TextureSlot::new(SLOT_MORPH_SURPRISE));
             } else if data.blink.contains(entity) {
-                data.texture_slot
-                    .insert(entity, TextureSlot::new(SLOT_MORPH_BLINK));
+                data.texture_slot.insert(entity, TextureSlot::new(SLOT_MORPH_BLINK));
             } else {
-                data.texture_slot
-                    .insert(entity, TextureSlot::new(SLOT_MORPH_NORMAL));
+                data.texture_slot.insert(entity, TextureSlot::new(SLOT_MORPH_NORMAL));
             }
         }
     }
