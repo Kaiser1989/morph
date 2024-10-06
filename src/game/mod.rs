@@ -67,8 +67,7 @@ pub fn start() {
     }
 
     // init game loop and run
-    let mut game_loop = GameLoop::new(GameManager::new());
-    game_loop.run();
+    GameLoop::start(GameManager::new());
 }
 
 //////////////////////////////////////////////////
@@ -246,6 +245,12 @@ impl Runner for GameManager {
         self.states.iter_mut().for_each(|state| {
             state.resize_device(graphics);
         });
+    }
+}
+
+impl Default for GameManager {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
