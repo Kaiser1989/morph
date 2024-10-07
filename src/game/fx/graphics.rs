@@ -224,6 +224,7 @@ impl GraphicsContext {
     pub fn resize(&mut self, width: u32, height: u32) {
         // update screen size
         self.resolution = vec2(width as f32, height as f32);
+        println!("RESIZE: {:?}", &self.resolution);
 
         // update viewport
         let gl = self.gl.as_ref().expect("Missing OpenGL context");

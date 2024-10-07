@@ -2,19 +2,23 @@
 name = "morph-it"
 version = "0.1.0"
 authors = ["Philipp Kaiser <philippxkaiser@googlemail.com>"]
-edition = "2018"
+edition = "2021"
 
-# Example of customizing the library in Cargo.toml.
 [lib]
-name = "morph_it"
-path = "src/lib.rs"
+#name = "main"
 crate-type = ["cdylib"]
+
+[[bin]]
+path = "src/lib.rs"
+name = "morph-it"
+required-features = ["desktop"]
+
+[features]
+desktop = []
 
 [dependencies]
 game-gl = { git = "https://github.com/Kaiser1989/game-gl" }
 specs = { version = "0.16.1", features = ["specs-derive", "shred-derive"] }
-log = "0.4.11"
-simple_logger = "1.11.0"
 shrev = "1.1.1"
 rusttype = "0.9.2"
 lazy_static = "1.4.0"
@@ -30,13 +34,23 @@ nphysics2d = "0.19.0"
 itertools = "0.10.0"
 rand = "0.8.1"
 smallvec = "1.6.1"
+log = "0.4.11"
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
+env_logger = "0.11.5"
 
 [target.'cfg(target_os = "android")'.dependencies]
-ndk-glue = "0.5.0"
+android-activity = { version = "0.6.0", features = ["native-activity"] }
+android_logger = "0.14.1"
 
 [package.metadata.android]
-build_targets = [ "armv7-linux-androideabi", "aarch64-linux-android", "i686-linux-android", "x86_64-linux-android" ]
+build_targets = [
+    "armv7-linux-androideabi",
+    "aarch64-linux-android",
+    "i686-linux-android",
+    "x86_64-linux-android",
+]
 opengles_version_major = 3
-opengles_version_minor = 0
+opengles_version_minor = 2
 assets = "assets"
 fullscreen = true
