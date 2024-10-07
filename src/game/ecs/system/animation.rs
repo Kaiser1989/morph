@@ -74,7 +74,7 @@ fn update_animation<C>(
 ) where
     C: Animatable + Component + Send + Sync,
 {
-    for (entity, mut anim) in (entities, anim_storage).join() {
+    for (entity, anim) in (entities, anim_storage).join() {
         let index = clamp_scalar(anim.current / anim.duration, 0.0, 1.0) * (anim.frames.len() - 1) as f32;
         let lower = anim.frames.get(index.floor() as usize).unwrap();
         let upper = anim.frames.get(index.ceil() as usize).unwrap();

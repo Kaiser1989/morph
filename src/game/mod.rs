@@ -58,7 +58,7 @@ pub enum StateEvent {
 pub fn start() {
     // init logging
     #[cfg(debug_assertions)]
-    let log_level = log::LevelFilter::Debug;
+    let log_level = log::LevelFilter::Info;
     #[cfg(not(debug_assertions))]
     let log_level = log::LevelFilter::Info;
     match SimpleLogger::new().with_utc_timestamps().with_level(log_level).init() {

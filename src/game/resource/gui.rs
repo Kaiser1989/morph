@@ -567,8 +567,8 @@ fn collect_render_data<T: Event + Clone>(element: &GuiBuilder<T>) -> Vec<GuiRend
         let color = element.color.unwrap_or_else(|| vec4(1.0, 1.0, 1.0, 1.0));
         let radius = element.rounded.unwrap_or(0.0);
         match element.rounded {
-            Some(_) => (0..9),
-            None => (4..5),
+            Some(_) => 0..9,
+            None => 4..5,
         }
         .for_each(|i| {
             data.push(GuiRenderInfo::new(position, size, color, layer, texture, texture_slot, i as f32, radius));

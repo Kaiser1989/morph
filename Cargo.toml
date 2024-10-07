@@ -11,7 +11,7 @@ path = "src/lib.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-game-gl = { git = "https://github.com/Kaiser1989/game-gl" }
+game-gl = { git = "https://github.com/Kaiser1989/game-gl", rev = "f3ffb29" }
 specs = { version = "0.16.1", features = ["specs-derive", "shred-derive"] }
 log = "0.4.11"
 simple_logger = "1.11.0"
@@ -35,7 +35,12 @@ smallvec = "1.6.1"
 ndk-glue = "0.5.0"
 
 [package.metadata.android]
-build_targets = [ "armv7-linux-androideabi", "aarch64-linux-android", "i686-linux-android", "x86_64-linux-android" ]
+build_targets = [
+    "armv7-linux-androideabi",
+    "aarch64-linux-android",
+    "i686-linux-android",
+    "x86_64-linux-android",
+]
 opengles_version_major = 3
 opengles_version_minor = 0
 assets = "assets"
