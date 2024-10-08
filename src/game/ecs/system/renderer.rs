@@ -145,13 +145,13 @@ impl RenderSystem {
         graphics.quad_ibo.bind();
 
         // render by plane
-        for (plane, v) in &instances.into_iter().group_by(|(p, _, _)| *p) {
+        for (plane, v) in &instances.into_iter().chunk_by(|(p, _, _)| *p) {
             // bind uniforms
             graphics.quad_ubo.update(&view_proj[plane]);
             graphics.quad_ubo.bind(1);
 
             // render by texture
-            for (texture, v) in &v.into_iter().group_by(|(_, t, _)| *t) {
+            for (texture, v) in &v.into_iter().chunk_by(|(_, t, _)| *t) {
                 // bind instances
                 let instances: Vec<Instance> = v.into_iter().map(|(_, _, i)| i).collect();
                 graphics.quad_inbo.update(&instances);

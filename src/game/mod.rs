@@ -14,7 +14,6 @@ pub mod utils;
 use game_gl::prelude::*;
 use log::info;
 use shrev::ReaderId;
-use simple_logger::SimpleLogger;
 
 use crate::game::fx::*;
 use crate::game::resource::*;
@@ -50,24 +49,6 @@ pub enum StateEvent {
     LoadLevel(usize),
     LoadLevelNext,
     UnloadLevel,
-}
-
-//////////////////////////////////////////////////
-// Entry Point
-
-pub fn start() {
-    // init logging
-    #[cfg(debug_assertions)]
-    let log_level = log::LevelFilter::Info;
-    #[cfg(not(debug_assertions))]
-    let log_level = log::LevelFilter::Info;
-    match SimpleLogger::new().with_utc_timestamps().with_level(log_level).init() {
-        Err(s) => println!("{}", s),
-        _ => {}
-    }
-
-    // init game loop and run
-    GameLoop::start(GameManager::new());
 }
 
 //////////////////////////////////////////////////
@@ -192,6 +173,8 @@ impl Runner for GameManager {
     }
 
     fn render(&mut self, _gl: &Gl) {
+        println!("render");
+
         // clear frame
         self.graphics.clear();
 

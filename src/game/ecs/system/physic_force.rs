@@ -54,13 +54,13 @@ impl<'a> System<'a> for PhysicForceSystem {
         {
             // apply gravity (if available)
             if let Some(gravity) = gravity {
-                let velocity = velocity.get_mut_unchecked();
+                let velocity = velocity.get_mut();
                 velocity.0 += vec2(0.0, gravity.0) * data.time.frame_time;
             }
 
             // apply acceleration (if available)
             if let Some(acceleration) = acceleration {
-                let velocity = velocity.get_mut_unchecked();
+                let velocity = velocity.get_mut();
                 velocity.0 += acceleration.0 * data.time.frame_time;
                 velocity.1 += acceleration.1 * data.time.frame_time;
             }

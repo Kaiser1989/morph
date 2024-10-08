@@ -13,7 +13,7 @@ use crate::game::fx::*;
 //////////////////////////////////////////////////
 // Definition
 
-#[derive(Debug, Copy, Clone, PartialEq, Enum, Deserialize, IntoEnumIterator)]
+#[derive(Debug, Copy, Clone, PartialEq, Enum, Deserialize, Sequence)]
 pub enum MorphState {
     Metal,
     Rubber,

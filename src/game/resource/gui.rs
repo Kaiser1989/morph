@@ -212,7 +212,7 @@ impl<T: Event + Clone> Gui<T> {
         graphics.find_texture(TEX_GUI_SLICE).bind(2);
 
         // render by texture
-        for (texture, v) in &instances.into_iter().group_by(|(t, _)| *t) {
+        for (texture, v) in &instances.into_iter().chunk_by(|(t, _)| *t) {
             // bind instances
             let instances: Vec<GuiInstance> = v.into_iter().map(|(_, i)| i).collect();
             graphics.gui_inbo.update(&instances);

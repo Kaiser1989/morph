@@ -136,7 +136,7 @@ impl Physix {
                 // sort by entity
                 .sorted_by_key(|t| t.0)
                 // group by entity to generate hashmap
-                .group_by(|(entity, _)| *entity)
+                .chunk_by(|(entity, _)| *entity)
                 .into_iter()
                 // resolve groups
                 .map(|(entity, interactions)| (entity, interactions.map(|(_, i)| i).collect())),
