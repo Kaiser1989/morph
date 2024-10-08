@@ -15,11 +15,11 @@ layout (std140) uniform Locals {
 out vec3 v_tex_coord;
 out float v_opacity;
 
-vec2 world(vec2 v, vec2 trans, vec2 scale, float rot) {
+vec2 world(vec2 pos, vec2 trans, vec2 scale, float rot) {
 	float s = sin(rot);
 	float c = cos(rot);
 	mat2 mat_rot = mat2(c, s, -s, c);
-	return mat_rot * (v * scale) + trans;
+	return mat_rot * (pos * scale) + trans;
 }
 
 void main() {

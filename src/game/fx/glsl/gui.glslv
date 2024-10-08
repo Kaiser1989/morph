@@ -19,11 +19,11 @@ out vec4 v_color;
 
 #define M_PI 3.1415926535897932384626433832795
 
-vec2 world(vec2 v, vec2 trans, vec2 scale, float rot) {
+vec2 world(vec2 pos, vec2 trans, vec2 scale, float rot) {
 	float s = sin(rot);
 	float c = cos(rot);
 	mat2 mat_rot = mat2(c, s, -s, c);
-	return mat_rot * (v * scale) + trans;
+	return mat_rot * (pos * scale) + trans;
 }
 
 void main() {

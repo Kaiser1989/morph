@@ -18,12 +18,14 @@ use crate::game::resource::*;
 //////////////////////////////////////////////////
 // Data
 
+#[repr(C)]
 #[derive(Debug, Default, Clone)]
 pub struct Vertex {
     pub pos: Vec2,
     pub tex_coord: Vec2,
 }
 
+#[repr(C)]
 #[derive(Debug, Default, Clone)]
 pub struct Instance {
     pub translate: Vec2,
@@ -34,6 +36,7 @@ pub struct Instance {
     pub opacity: f32,
 }
 
+#[repr(C)]
 #[derive(Debug, Default, Clone)]
 pub struct GuiInstance {
     pub translate: Vec2,
@@ -45,6 +48,7 @@ pub struct GuiInstance {
     pub radius: f32,
 }
 
+#[repr(C)]
 #[derive(Debug, Default, Clone)]
 pub struct GlyphInstance {
     pub translate: Vec2,
@@ -399,4 +403,11 @@ fn create_font_texture(gl: &Gl) -> GlTexture {
         })
         .collect();
     GlTexture::new(gl, &images)
+}
+
+#[test]
+pub fn test_foo() {
+    println!("{}", size_of::<GuiInstance>());
+    println!("{}", size_of::<Vec2>());
+    println!("{}", size_of::<f32>());
 }
