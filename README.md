@@ -9,6 +9,9 @@ Feel free to add stuff or make commits.
 If you are on Windows, you can instantly start playing:
 `cargo run --release`
 
+On android you need to run:
+`cargo apk run`
+
 This project is also working on android, after fixing bugs in winit & glutin. Check my game engine for more information:
 https://github.com/Kaiser1989/game-gl
 
