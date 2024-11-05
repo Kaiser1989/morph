@@ -11,6 +11,10 @@ pub mod utils;
 //////////////////////////////////////////////////
 // Using
 
+use std::sync::Arc;
+
+use config::Config;
+use config::RawConfig;
 use game_gl::prelude::*;
 use log::info;
 use shrev::ReaderId;
@@ -29,6 +33,7 @@ pub struct GameManager {
     resource: ResourceContext,
     graphics: GraphicsContext,
     input: InputContext,
+    config: Config,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -54,8 +59,15 @@ pub enum StateEvent {
 //////////////////////////////////////////////////
 // Implementation
 
-impl Runner for GameManager {
-    fn init(&mut self) {
+impl GameLoop for GameManager {
+    fn title(&self) -> &str {
+        "Morph"
+    }
+
+    fn init(&mut self, ctx: &mut GameContext) {
+        // load config
+        self.config = Arc::new(RawConfig::new(ctx));
+
         // update all states
         let resource = &self.resource;
         self.states.iter_mut().for_each(|state| {
@@ -63,7 +75,7 @@ impl Runner for GameManager {
         });
     }
 
-    fn cleanup(&mut self) {
+    fn cleanup(&mut self, _ctx: &mut GameContext) {
         // update all states
         let resource = &self.resource;
         self.states.iter_mut().for_each(|state| {
@@ -71,7 +83,7 @@ impl Runner for GameManager {
         });
     }
 
-    fn input(&mut self, input_events: &[InputEvent]) {
+    fn input(&mut self, _ctx: &mut GameContext, input_events: &[InputEvent]) {
         // update input context
         self.input.update(input_events);
 
@@ -81,7 +93,7 @@ impl Runner for GameManager {
         }
     }
 
-    fn update(&mut self, elapsed_time: f32) {
+    fn update(&mut self, ctx: &mut GameContext, elapsed_time: f32) {
         //println!("FPS: {}", 1.0 / elapsed_time);
 
         // update delayed events
@@ -93,57 +105,53 @@ impl Runner for GameManager {
                 // states
                 StateEvent::Menu => {
                     info!("StateEvent: Menu");
-                    self.push_state(Box::new(MenuState::new()));
+                    self.push_state(Box::new(MenuState::new(&self.config)));
                 }
                 StateEvent::MenuSettings => {
                     info!("StateEvent: MenuSettings");
-                    self.push_state(Box::new(MenuSettingsState::new()));
+                    self.push_state(Box::new(MenuSettingsState::new(&self.config)));
                 }
                 StateEvent::MenuPackage => {
                     info!("StateEvent: MenuPackage");
-                    self.push_state(Box::new(MenuPackageState::new()));
+                    self.push_state(Box::new(MenuPackageState::new(&self.config)));
                 }
                 StateEvent::MenuPackageLevel => {
                     info!("StateEvent: MenuPackageLevel");
                     if self.resource.package_info().is_some() {
-                        self.push_state(Box::new(MenuPackageLevelState::new()));
+                        self.push_state(Box::new(MenuPackageLevelState::new(&self.config)));
                     }
                 }
                 StateEvent::Level => {
                     info!("StateEvent: Level");
                     if self.resource.level_info().is_some() {
-                        self.push_state(Box::new(LevelState::new()));
+                        self.push_state(Box::new(LevelState::new(&self.config)));
                     }
                 }
                 StateEvent::LevelPause => {
                     info!("StateEvent: LevelPause");
-                    self.push_state(Box::new(LevelPauseState::new()));
+                    self.push_state(Box::new(LevelPauseState::new(&self.config)));
                 }
                 StateEvent::LevelSuccess => {
                     info!("StateEvent: LevelSuccess");
-                    self.push_state(Box::new(LevelSuccessState::new()));
+                    self.push_state(Box::new(LevelSuccessState::new(&self.config)));
                 }
                 StateEvent::LevelFailure => {
                     info!("StateEvent: LevelFailure");
-                    self.push_state(Box::new(LevelFailureState::new()));
+                    self.push_state(Box::new(LevelFailureState::new(&self.config)));
                 }
                 StateEvent::Back => {
                     info!("StateEvent: Back");
                     self.pop_state();
                 }
                 StateEvent::Exit => {
-                    info!("StateEvent: Exit");
-                    #[cfg(target_os = "android")]
-                    ndk_glue::native_activity().finish();
-                    #[cfg(not(target_os = "android"))]
-                    std::process::exit(0);
+                    ctx.exit();
                 }
 
                 // content
                 StateEvent::LoadPackage(package) => {
                     info!("StateEvent: LoadPackage({})", &package);
-                    self.resource.load_package(&package);
-                    self.graphics.load_package_textures(self.resource.package_info().unwrap());
+                    self.resource.load_package(ctx, &package);
+                    self.graphics.load_package_textures(ctx, self.resource.package_info().unwrap());
                 }
                 StateEvent::UnloadPackage => {
                     info!("StateEvent: UnloadPackage");
@@ -172,9 +180,7 @@ impl Runner for GameManager {
         }
     }
 
-    fn render(&mut self, _gl: &Gl) {
-        println!("render");
-
+    fn render(&mut self, _ctx: &mut GameContext, _gl: &Gl) {
         // clear frame
         self.graphics.clear();
 
@@ -186,13 +192,13 @@ impl Runner for GameManager {
         });
     }
 
-    fn create_device(&mut self, gl: &Gl) {
+    fn create_device(&mut self, ctx: &mut GameContext, gl: &Gl) {
         // create device context
-        self.graphics.create(gl);
+        self.graphics.create(ctx, &self.config, gl);
 
         // load package graphics
         if let Some(package_info) = self.resource.package_info() {
-            self.graphics.load_package_textures(package_info);
+            self.graphics.load_package_textures(ctx, package_info);
         }
 
         // update all states
@@ -202,7 +208,7 @@ impl Runner for GameManager {
         });
     }
 
-    fn destroy_device(&mut self, _gl: &Gl) {
+    fn destroy_device(&mut self, _ctx: &mut GameContext, _gl: &Gl) {
         // update all states
         let graphics = &mut self.graphics;
         self.states.iter_mut().for_each(|state| {
@@ -216,7 +222,7 @@ impl Runner for GameManager {
         self.graphics.destroy();
     }
 
-    fn resize_device(&mut self, _gl: &Gl, width: u32, height: u32) {
+    fn resize_device(&mut self, _ctx: &mut GameContext, _gl: &Gl, width: u32, height: u32) {
         // resize device
         self.graphics.resize(width, height);
 
@@ -246,6 +252,7 @@ impl GameManager {
         let resource = ResourceContext::new();
         let graphics = Default::default();
         let input = Default::default();
+        let config = Config::default();
         GameManager {
             states,
             events,
@@ -253,6 +260,7 @@ impl GameManager {
             resource,
             graphics,
             input,
+            config,
         }
     }
 

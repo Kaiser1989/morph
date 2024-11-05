@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////
 // Using
 
-use crate::game::config::*;
+use crate::game::config::Config;
 use crate::game::fx::*;
 use crate::game::resource::gui::*;
 
@@ -10,7 +10,7 @@ use super::MenuEvent;
 //////////////////////////////////////////////////
 // GUI
 
-pub fn create() -> GuiBuilder<MenuEvent> {
+pub fn create(config: &Config) -> GuiBuilder<MenuEvent> {
     GuiBuilder::new("menu").size(Value::Auto, Value::Auto).padding(0.1, 0.1, 0.1, 0.1).vertical().children(vec![
         GuiBuilder::new("top")
             .size(Value::Auto, Value::Auto)
@@ -24,7 +24,7 @@ pub fn create() -> GuiBuilder<MenuEvent> {
                 .rounded(0.2)
                 .click(MenuEvent::Play)
                 .align(CENTER, CENTER)
-                .text("Play", 1.0, CONFIG.color_white),
+                .text("Play", 1.0, config.color_white),
             GuiBuilder::new("settings")
                 .size(Value::Fixed(8.0), Value::Fixed(1.25))
                 .margin(0.1, 0.1, 0.1, 0.1)
@@ -32,7 +32,7 @@ pub fn create() -> GuiBuilder<MenuEvent> {
                 .rounded(0.2)
                 .click(MenuEvent::Settings)
                 .align(CENTER, CENTER)
-                .text("Settings", 1.0, CONFIG.color_white),
+                .text("Settings", 1.0, config.color_white),
             GuiBuilder::new("exit")
                 .size(Value::Fixed(8.0), Value::Fixed(1.25))
                 .margin(0.1, 0.1, 0.1, 0.1)
@@ -41,7 +41,7 @@ pub fn create() -> GuiBuilder<MenuEvent> {
                 .rounded(0.2)
                 .click(MenuEvent::Exit)
                 .align(CENTER, CENTER)
-                .text("Exit", 1.0, CONFIG.color_white),
+                .text("Exit", 1.0, config.color_white),
         ]),
     ])
 }

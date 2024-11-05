@@ -25,6 +25,7 @@ pub struct Data<'a> {
     // resources
     entities: Entities<'a>,
     time: Read<'a, GameTime>,
+    config: Read<'a, Config>,
 
     // write components
     dynamic: WriteStorage<'a, Dynamic>,
@@ -56,6 +57,8 @@ impl<'a> System<'a> for StoryObjectSystem {
     }
 
     fn run(&mut self, mut data: Self::SystemData) {
+        let config = data.config;
+
         // update trackers
         self.contact_tracker.update(&data.contact);
 
@@ -64,7 +67,7 @@ impl<'a> System<'a> for StoryObjectSystem {
             let broken = data.broken.get(entity).is_some();
             let mut contact = *data.contact.get(entity).unwrap();
             let impulse_length = length(&contact.0);
-            if !broken && impulse_length > CONFIG.physic_break_impulse {
+            if !broken && impulse_length > config.physic_break_impulse {
                 // find all group entities
                 for (entity, _) in (&data.entities, &data.breakable).join().filter(|(_, b)| b.0 == breakable.0) {
                     // random angular rotation
@@ -75,7 +78,7 @@ impl<'a> System<'a> for StoryObjectSystem {
 
                     // random velocity
                     // (linear)
-                    contact.0 *= CONFIG.physic_break_impulse / impulse_length;
+                    contact.0 *= config.physic_break_impulse / impulse_length;
                     let velocity = data.velocity.get_mut_or_default(entity).unwrap();
                     velocity.0 = rotate_vec2(
                         &(contact.0 * Uniform::new_inclusive(0.8, 1.0).sample(&mut rng) * 0.2),
@@ -91,7 +94,7 @@ impl<'a> System<'a> for StoryObjectSystem {
                     data.velocity_limit.insert(entity, VelocityLimit::new(10.0, 10.0));
                     data.gravity.insert(entity, Gravity::new(-9.81));
                     data.material.insert(entity, Material::new(0.3, 0.5));
-                    data.collision.insert(entity, Role::Particle.collision());
+                    data.collision.insert(entity, Role::Particle.collision(&config));
                     data.broken.insert(entity, Broken);
                     data.lifetime.insert(entity, Lifetime::new(&data.time, 1.5));
                 }

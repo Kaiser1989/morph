@@ -2,26 +2,16 @@
 // Using
 
 use std::cmp::Ordering;
-use std::collections::HashMap;
 use std::default::Default;
 
 use game_gl::gl;
 use itertools::Itertools;
-use lazy_static::*;
 use nalgebra_glm::*;
-use rusttype::{point, Font, Scale};
 use shrev::Event;
 
 use crate::game::config::*;
 use crate::game::fx::*;
 use crate::game::resource::*;
-
-//////////////////////////////////////////////////
-// Static Constants
-
-lazy_static! {
-    static ref FONT_WIDTHS: HashMap<char, f32> = create_font_widths();
-}
 
 //////////////////////////////////////////////////
 // Definition
@@ -30,6 +20,7 @@ pub struct Gui<T: Event + Clone> {
     dimension: Vec2,
     resolution: Vec2,
     builder: GuiBuilder<T>,
+    config: Config,
 }
 
 pub const HORIZONTAL: usize = 0;
@@ -100,11 +91,12 @@ pub struct GuiFontRenderInfo {
 // Implementation
 
 impl<T: Event + Clone> Gui<T> {
-    pub fn new() -> Gui<T> {
+    pub fn new(config: &Config) -> Gui<T> {
         Gui::<T> {
             dimension: vec2(0.0, 0.0),
             resolution: vec2(0.0, 0.0),
             builder: GuiBuilder::<T>::new("root"),
+            config: config.clone(),
         }
     }
 
@@ -113,11 +105,15 @@ impl<T: Event + Clone> Gui<T> {
         // set pos/size of root element
         self.builder.pos = vec2(0.0, self.dimension.y);
         self.builder.size = self.dimension;
-        self.builder.layer = CONFIG.menu_layer;
+        self.builder.layer = self.config.menu_layer;
+    }
+
+    pub fn cleanup(&mut self) {
+        *self = Gui::new(&self.config)
     }
 
     pub fn update(&mut self) {
-        update(&mut self.builder);
+        update(&mut self.builder, &self.config);
     }
 
     pub fn handle_input(&self, input: &InputContext, events: &mut Events<T>) {
@@ -144,7 +140,7 @@ impl<T: Event + Clone> Gui<T> {
         self.resolution = resolution;
         let aspect_ratio = resolution.x / resolution.y;
         let aspect_vec = if aspect_ratio > 1.0 { vec2(aspect_ratio, 1.0) } else { vec2(1.0, 1.0 / aspect_ratio) };
-        self.dimension = aspect_vec * CONFIG.menu_camera_zoom;
+        self.dimension = aspect_vec * self.config.menu_camera_zoom;
         // change pos/size of root element
         self.builder.pos = vec2(0.0, self.dimension.y);
         self.builder.size = self.dimension;
@@ -183,7 +179,7 @@ impl<T: Event + Clone> Gui<T> {
         });
 
         // create glyph instances; sort by layer
-        let mut glyph_instances: Vec<GlyphInstance> = collect_font_render_data(&self.builder)
+        let mut glyph_instances: Vec<GlyphInstance> = collect_font_render_data(&self.builder, &self.config)
             .into_iter()
             .map(|gui_data| GlyphInstance {
                 translate: gui_data.position.into(),
@@ -379,7 +375,7 @@ impl<T: Event + Clone> GuiBuilder<T> {
 //////////////////////////////////////////////////
 // Helper
 
-fn update<T: Event + Clone>(element: &mut GuiBuilder<T>) {
+fn update<T: Event + Clone>(element: &mut GuiBuilder<T>, config: &Config) {
     // get element data
     let pos = element.pos;
     let size = element.size;
@@ -391,11 +387,11 @@ fn update<T: Event + Clone>(element: &mut GuiBuilder<T>) {
         element.children = text
             .chars()
             .map(|c| {
-                let char_width = *FONT_WIDTHS.get(&c).unwrap();
+                let char_width = *config.font_widths.get(&c).unwrap();
                 let mut child =
                     GuiBuilder::<T>::new("font_do_not_search_for")
                         .size(Value::Fixed(size * char_width), Value::Fixed(*size))
-                        .margin(size * CONFIG.font_spacing, size * CONFIG.font_spacing, 0.0, 0.0);
+                        .margin(size * config.font_spacing, size * config.font_spacing, 0.0, 0.0);
                 child.glyph = Some((c, char_width, *color));
                 child
             })
@@ -546,10 +542,10 @@ fn update<T: Event + Clone>(element: &mut GuiBuilder<T>) {
     // update all children
     element.children.iter_mut().for_each(|child| {
         // set childrens' layer
-        child.layer = layer + CONFIG.menu_layer_delta;
+        child.layer = layer + config.menu_layer_delta;
 
         // recursive update of all children
-        update(child);
+        update(child, config);
     });
 }
 
@@ -581,7 +577,7 @@ fn collect_render_data<T: Event + Clone>(element: &GuiBuilder<T>) -> Vec<GuiRend
     data
 }
 
-fn collect_font_render_data<T: Event + Clone>(element: &GuiBuilder<T>) -> Vec<GuiFontRenderInfo> {
+fn collect_font_render_data<T: Event + Clone>(element: &GuiBuilder<T>, config: &Config) -> Vec<GuiFontRenderInfo> {
     let mut data: Vec<GuiFontRenderInfo> = Vec::new();
 
     // get text data of this element
@@ -589,7 +585,7 @@ fn collect_font_render_data<T: Event + Clone>(element: &GuiBuilder<T>) -> Vec<Gu
         let position = vec2(element.pos.x + element.size.x * 0.5, element.pos.y - element.size.y * 0.5);
         let size = vec2(element.size.x * 0.5, element.size.y * 0.5);
         let color = *color;
-        let layer = element.layer - CONFIG.menu_layer_font_offset;
+        let layer = element.layer - config.menu_layer_font_offset;
         let unicode = *glyph;
         let width = *width;
         data.push(GuiFontRenderInfo {
@@ -603,7 +599,7 @@ fn collect_font_render_data<T: Event + Clone>(element: &GuiBuilder<T>) -> Vec<Gu
     }
 
     // get data of children
-    data.extend(element.children.iter().map(|child| collect_font_render_data(child)).flatten());
+    data.extend(element.children.iter().map(|child| collect_font_render_data(child, config)).flatten());
 
     data
 }
@@ -658,28 +654,6 @@ fn find_element<'a, T: Event + Clone>(element: &'a mut GuiBuilder<T>, id: &str) 
 
 fn inside_rect(min: Vec2, max: Vec2, point: Vec2) -> bool {
     point.x >= min.x && point.x <= max.x && point.y >= min.y && point.y <= max.y
-}
-
-pub fn create_font_widths() -> HashMap<char, f32> {
-    // create font
-    let font = Font::try_from_bytes(&CONFIG.font).expect("Error constructing Font");
-    let text: String = (0..128 as u8).map(|c| c as char).collect();
-    let scale = Scale::uniform(CONFIG.font_size as f32);
-    let v_metrics = font.v_metrics(scale);
-    let glyphs = font.layout(&text, scale, point(0.0, v_metrics.ascent));
-    glyphs
-        .enumerate()
-        .map(|(i, glyph)| {
-            // get width of glyph (as percentage)
-            let width = if let Some(bounding_box) = glyph.pixel_bounding_box() {
-                let glyph_width = (bounding_box.max.x - bounding_box.min.x).min(CONFIG.font_size);
-                glyph_width as f32 / CONFIG.font_size as f32
-            } else {
-                0.25
-            };
-            (i as u8 as char, width)
-        })
-        .collect()
 }
 
 impl GuiRenderInfo {

@@ -10,6 +10,7 @@ use itertools::Itertools;
 use nalgebra_glm::*;
 use specs::prelude::*;
 
+use crate::game::config::Config;
 use crate::game::fx::{GraphicsContext, Instance, TextureSrc};
 
 use crate::game::ecs::component::*;
@@ -26,6 +27,7 @@ pub struct RenderSystemData<'a> {
     // resources
     entities: Entities<'a>,
     actors: Read<'a, Actors>,
+    config: Read<'a, Config>,
 
     // write components
     position: WriteStorage<'a, Position>,
@@ -61,6 +63,7 @@ impl RenderSystem {
     pub fn draw(&self, world: &mut World, graphics: &mut GraphicsContext) {
         // get world data
         let mut data: RenderSystemData = world.system_data();
+        let config = data.config;
 
         // create instances; sort by plane -> layer -> texture
         let mut instances: Vec<(Plane, TextureSrc, Instance)> = (
@@ -79,7 +82,7 @@ impl RenderSystem {
                     translate: position.0,
                     rotate: rotation.map(|x| x.0).unwrap_or(0.0),
                     scale: shape.size(),
-                    layer: -(layer.plane.layer() + (layer.rank as f32) / 10.0), // inverse layer
+                    layer: -(layer.plane.layer(&config) + (layer.rank as f32) / 10.0), // inverse layer
                     tex_slot: texture_slot.map(|x| x.0).unwrap_or(0.0),
                     opacity: opacity.map(|x| x.0).unwrap_or(1.0),
                     // TODO: Add Color

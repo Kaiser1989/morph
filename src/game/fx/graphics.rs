@@ -3,7 +3,6 @@
 
 use std::mem::size_of;
 
-use game_gl::file::File;
 use game_gl::opengl::*;
 use game_gl::prelude::*;
 use image::imageops::{resize, FilterType};
@@ -112,7 +111,7 @@ impl GraphicsContext {
     //////////////////////////////////////////////////
     // Device functions
 
-    pub fn create(&mut self, gl: &Gl) {
+    pub fn create(&mut self, ctx: &GameContext, config: &Config, gl: &Gl) {
         // create vertex buffer
         self.quad_vbo = GlVertexBuffer::new(
             gl,
@@ -196,9 +195,9 @@ impl GraphicsContext {
         self.glyph_ubo = GlUniformBuffer::new(gl, gl::DYNAMIC_DRAW, &identity());
 
         // create textures
-        self.glyph_texture = create_font_texture(gl);
-        self.gui_textures = create_textures(gl, &GUI_TEXTURES);
-        self.game_textures = create_textures(gl, &GAME_TEXTURES);
+        self.glyph_texture = create_font_texture(&config, gl);
+        self.gui_textures = create_textures(ctx, gl, &GUI_TEXTURES);
+        self.game_textures = create_textures(ctx, gl, &GAME_TEXTURES);
 
         // create shaders
         self.quad_shader = GlShader::new(gl, include_bytes!("glsl/quad.glslv"), include_bytes!("glsl/quad.glslf"));
@@ -296,7 +295,7 @@ impl GraphicsContext {
     //////////////////////////////////////////////////
     // Texture
 
-    pub fn load_package_textures(&mut self, package_info: &PackageInfo) {
+    pub fn load_package_textures(&mut self, ctx: &GameContext, package_info: &PackageInfo) {
         if let Some(gl) = self.gl.as_ref() {
             // create texture map from package
             let package_textures: Vec<Vec<String>> = package_info
@@ -308,7 +307,7 @@ impl GraphicsContext {
                 .iter()
                 .map(|texture_array| texture_array.iter().map(|texture| texture.as_str()).collect::<Vec<&str>>())
                 .collect::<Vec<Vec<&str>>>();
-            self.package_textures = create_textures(gl, &package_texture_refs);
+            self.package_textures = create_textures(ctx, gl, &package_texture_refs);
         }
     }
 
@@ -345,14 +344,14 @@ unsafe impl Send for GraphicsContext {}
 //////////////////////////////////////////////////
 // Helper
 
-fn create_textures(gl: &Gl, textures: &[Vec<&str>]) -> Vec<GlTexture> {
+fn create_textures(ctx: &GameContext, gl: &Gl, textures: &[Vec<&str>]) -> Vec<GlTexture> {
     textures
         .iter()
         .map(|pathes| {
             let images: Vec<RgbaImage> = pathes
                 .iter()
                 .map(|path| {
-                    image::load_from_memory(&File::load_bytes(path).expect(&format!("Failed to load file {}", path)))
+                    image::load_from_memory(&ctx.files().load_bytes(path).expect(&format!("Failed to load file {}", path)))
                         .expect("Failed to read memory")
                         .to_rgba8()
                 })
@@ -370,11 +369,11 @@ fn _create_color_texture(gl: &Gl, textures: &[U8Vec4]) -> GlTexture {
     GlTexture::new(gl, &images)
 }
 
-fn create_font_texture(gl: &Gl) -> GlTexture {
+fn create_font_texture(config: &Config, gl: &Gl) -> GlTexture {
     // create font
-    let font = Font::try_from_bytes(&CONFIG.font).expect("Error constructing Font");
+    let font = Font::try_from_bytes(&config.font).expect("Error constructing Font");
     let text: String = (0..128 as u8).map(|c| c as char).collect();
-    let scale = Scale::uniform(CONFIG.font_size as f32);
+    let scale = Scale::uniform(config.font_size as f32);
     let v_metrics = font.v_metrics(scale);
     let glyphs = font.layout(&text, scale, point(0.0, v_metrics.ascent));
     // generate glyph images
@@ -383,9 +382,9 @@ fn create_font_texture(gl: &Gl) -> GlTexture {
             // get bounding
             if let Some(bounding_box) = glyph.pixel_bounding_box() {
                 let glyph_width = bounding_box.max.x - bounding_box.min.x;
-                let offset = (CONFIG.font_size - glyph_width).max(0) / 2;
+                let offset = (config.font_size - glyph_width).max(0) / 2;
                 // create new image to render glyph
-                let mut image = GrayImage::new(glyph_width.max(CONFIG.font_size) as u32, CONFIG.font_size as u32);
+                let mut image = GrayImage::new(glyph_width.max(config.font_size) as u32, config.font_size as u32);
                 // Draw the glyph into the image per-pixel by using the draw closure
                 glyph.draw(|x, y, v| {
                     image.put_pixel(
@@ -397,9 +396,9 @@ fn create_font_texture(gl: &Gl) -> GlTexture {
                     )
                 });
                 // Save the image to a png file
-                resize(&image, CONFIG.font_size as u32, CONFIG.font_size as u32, FilterType::CatmullRom)
+                resize(&image, config.font_size as u32, config.font_size as u32, FilterType::CatmullRom)
             } else {
-                GrayImage::new(CONFIG.font_size as u32, CONFIG.font_size as u32)
+                GrayImage::new(config.font_size as u32, config.font_size as u32)
             }
         })
         .collect();

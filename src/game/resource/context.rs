@@ -1,6 +1,8 @@
 //////////////////////////////////////////////////
 // Using
 
+use game_gl::GameContext;
+
 use crate::game::resource::*;
 
 //////////////////////////////////////////////////
@@ -19,8 +21,8 @@ impl ResourceContext {
         ResourceContext { package: None, level: None }
     }
 
-    pub fn load_package(&mut self, package: &str) {
-        self.package = Some(PackageInfo::from(package));
+    pub fn load_package(&mut self, ctx: &GameContext, package: &str) {
+        self.package = Some(PackageInfo::new(ctx, package));
     }
 
     pub fn unload_package(&mut self) {
