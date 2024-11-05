@@ -6,6 +6,7 @@ use log::info;
 use nalgebra_glm::*;
 use shrev::ReaderId;
 
+use crate::game::config::Config;
 use crate::game::ecs::resource::MorphState;
 use crate::game::fx::GraphicsContext;
 use crate::game::resource::{Events, Gui, InputContext, ResourceContext};
@@ -19,6 +20,7 @@ use super::scene::Scene;
 // Definition
 
 pub struct LevelState {
+    config: Config,
     events: Events<LevelEvent>,
     reader: ReaderId<LevelEvent>,
     gui: EnumMap<LevelPhase, Gui<LevelEvent>>,
@@ -58,17 +60,25 @@ impl Default for SystemPhase {
 // Implementation
 
 impl LevelState {
-    pub fn new() -> LevelState {
+    pub fn new(config: &Config) -> LevelState {
         let gui = enum_map! {
-            LevelPhase::Preview => Gui::new(),
-            LevelPhase::Running => Gui::new(),
-            LevelPhase::Finish => Gui::new(),
+            LevelPhase::Preview => Gui::new(config),
+            LevelPhase::Running => Gui::new(config),
+            LevelPhase::Finish => Gui::new(config),
         };
+        let config = config.clone();
         let mut events = Events::new();
         let reader = events.register();
-        let scene = Scene::new(events.register());
+        let scene = Scene::new(&config, events.register());
         let phase = LevelPhase::Preview;
-        LevelState { gui, scene, events, reader, phase }
+        LevelState {
+            config,
+            gui,
+            scene,
+            events,
+            reader,
+            phase,
+        }
     }
 }
 
@@ -78,7 +88,7 @@ impl GameState for LevelState {
         self.phase = LevelPhase::Preview;
         // init gui
         self.gui.iter_mut().for_each(|(phase, gui)| {
-            gui.init(&gui::create(resource, phase));
+            gui.init(&gui::create(&self.config, resource, phase));
         });
         // init scene
         self.scene.init(resource);
@@ -86,13 +96,9 @@ impl GameState for LevelState {
 
     fn cleanup(&mut self, _resource: &ResourceContext) {
         // clear scene
-        self.scene = Scene::new(self.events.register());
+        self.scene.cleanup();
         // clear gui
-        self.gui = enum_map! {
-            LevelPhase::Preview => Gui::new(),
-            LevelPhase::Running => Gui::new(),
-            LevelPhase::Finish => Gui::new(),
-        };
+        self.gui.values_mut().for_each(Gui::cleanup);
         // clear phase
         self.phase = LevelPhase::Preview;
     }

@@ -29,6 +29,7 @@ pub struct Data<'a> {
     // resources
     entities: Entities<'a>,
     actors: Read<'a, Actors>,
+    config: Read<'a, Config>,
 
     // write components
     dynamic: WriteStorage<'a, Dynamic>,
@@ -66,6 +67,8 @@ impl<'a> System<'a> for StoryMorphSystem {
     }
 
     fn run(&mut self, mut data: Self::SystemData) {
+        let config = data.config;
+
         // update trackers
         self.bubble_tracker.update(&data.bubble);
         self.water_tracker.update(&data.water);
@@ -80,22 +83,22 @@ impl<'a> System<'a> for StoryMorphSystem {
 
         // handle slow insertion
         for (_, velocity_limit, _) in (&data.entities, &mut data.velocity_limit, &morph_mask & self.slow_tracker.inserted()).join() {
-            velocity_limit.0 = CONFIG.physic_grid_max_velocity;
+            velocity_limit.0 = config.physic_grid_max_velocity;
         }
 
         // handle slow removing
         for (entity, velocity_limit, _) in (&data.entities, &mut data.velocity_limit, &morph_mask & self.slow_tracker.removed()).join() {
             if data.bubble.contains(entity) {
-                *velocity_limit = MorphState::Bubble.velocity_limit();
+                *velocity_limit = MorphState::Bubble.velocity_limit(&config);
             }
             if data.water.contains(entity) {
-                *velocity_limit = MorphState::Water.velocity_limit();
+                *velocity_limit = MorphState::Water.velocity_limit(&config);
             }
             if data.rubber.contains(entity) {
-                *velocity_limit = MorphState::Rubber.velocity_limit();
+                *velocity_limit = MorphState::Rubber.velocity_limit(&config);
             }
             if data.metal.contains(entity) {
-                *velocity_limit = MorphState::Metal.velocity_limit();
+                *velocity_limit = MorphState::Metal.velocity_limit(&config);
             }
         }
 

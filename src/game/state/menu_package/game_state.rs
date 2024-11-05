@@ -5,6 +5,7 @@ use log::info;
 use nalgebra_glm::*;
 use shrev::ReaderId;
 
+use crate::game::config::Config;
 use crate::game::fx::GraphicsContext;
 use crate::game::resource::{Events, Gui, GuiBuilder, InputContext, ResourceContext};
 use crate::game::state::GameState;
@@ -16,6 +17,7 @@ use super::gui;
 // Definition
 
 pub struct MenuPackageState {
+    config: Config,
     gui: Gui<MenuPackageEvent>,
     events: Events<MenuPackageEvent>,
     reader: ReaderId<MenuPackageEvent>,
@@ -31,18 +33,19 @@ pub enum MenuPackageEvent {
 // Implementation
 
 impl MenuPackageState {
-    pub fn new() -> MenuPackageState {
-        let gui = Gui::new();
+    pub fn new(config: &Config) -> MenuPackageState {
+        let config = config.clone();
+        let gui = Gui::new(&config);
         let mut events = Events::new();
         let reader = events.register();
-        MenuPackageState { gui, events, reader }
+        MenuPackageState { config, gui, events, reader }
     }
 }
 
 impl GameState for MenuPackageState {
     fn init(&mut self, _resource: &ResourceContext) {
         // init gui
-        self.gui.init(&gui::create());
+        self.gui.init(&gui::create(&self.config));
     }
 
     fn cleanup(&mut self, _resource: &ResourceContext) {

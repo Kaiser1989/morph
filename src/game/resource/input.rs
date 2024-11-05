@@ -51,7 +51,7 @@ impl InputContext {
                 _ => {}
             },
             InputEvent::Touch(TouchEvent { state, location, id: _ }) => {
-                self.cursor_location = vec2(location.x, location.y);
+                self.cursor_location = vec2(location.x / self.resolution.x, 1.0 - location.y / self.resolution.y);
                 match state {
                     TouchState::Down => {
                         self.press();
@@ -66,7 +66,7 @@ impl InputContext {
                 }
             }
             InputEvent::Keyboard(KeyboardEvent { state, key }) => match (state, key) {
-                (KeyState::Released, Key::Back) => {
+                (KeyState::Released, Key::Escape) => {
                     self.back = true;
                 }
                 _ => {}

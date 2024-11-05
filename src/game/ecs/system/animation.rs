@@ -4,6 +4,7 @@
 
 use nalgebra_glm::*;
 use specs::prelude::*;
+use specs::storage::AccessMut;
 use specs::storage::GenericWriteStorage;
 
 use crate::game::ecs::component::*;
@@ -78,8 +79,8 @@ fn update_animation<C>(
         let index = clamp_scalar(anim.current / anim.duration, 0.0, 1.0) * (anim.frames.len() - 1) as f32;
         let lower = anim.frames.get(index.floor() as usize).unwrap();
         let upper = anim.frames.get(index.ceil() as usize).unwrap();
-        let comp = comp_storage.get_mut_or_default(entity).unwrap();
-        *comp = lower.interpolate(upper, index.fract());
+        let mut comp = comp_storage.get_mut_or_default(entity).unwrap();
+        *(comp.access_mut()) = lower.interpolate(upper, index.fract());
         anim.current += time.frame_time;
         if anim.current >= anim.duration {
             match anim.kind {

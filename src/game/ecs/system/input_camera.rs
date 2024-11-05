@@ -20,6 +20,7 @@ pub struct InputCameraSystem;
 pub struct Data<'a> {
     // resources
     actors: Read<'a, Actors>,
+    config: Read<'a, Config>,
 
     // events
     event_scene_start: Option<Read<'a, EventSceneStart>>,
@@ -42,19 +43,21 @@ impl<'a> System<'a> for InputCameraSystem {
     }
 
     fn run(&mut self, mut data: Self::SystemData) {
+        let config = data.config;
+
         // check scene start event
         if let Some(_) = data.event_scene_start {
             let morph_entity = data.actors.morph.unwrap();
             let camera_entity = data.actors.camera.unwrap();
             data.follow.insert(camera_entity, Follow(morph_entity));
-            data.follow_lag.insert(camera_entity, FollowLag(CONFIG.level_camera_follow));
+            data.follow_lag.insert(camera_entity, FollowLag(config.level_camera_follow));
         }
 
         // check camera move event
         if let Some(camera_move) = data.event_camera_move {
             let camera_entity = data.actors.camera.unwrap();
             let velocity = data.velocity.get_mut(camera_entity).unwrap();
-            velocity.0 += vec2(camera_move.0.x, -camera_move.0.y) * CONFIG.level_camera_speed;
+            velocity.0 += vec2(camera_move.0.x, -camera_move.0.y) * config.level_camera_speed;
         };
     }
 }

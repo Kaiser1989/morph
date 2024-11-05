@@ -2,7 +2,7 @@
 // Using
 
 use enum_map::*;
-use game_gl::file::File;
+use game_gl::GameContext;
 use nalgebra_glm::*;
 use serde::Deserialize;
 
@@ -132,9 +132,9 @@ impl LevelInfo {
     }
 }
 
-impl From<&str> for PackageInfo {
-    fn from(package: &str) -> Self {
-        serde_json::from_str(&File::load_string(&format!("level/{}/info.json", package)).expect("Failed to load level info file")).expect("Failed to parse json")
+impl PackageInfo {
+    pub fn new(ctx: &GameContext, package: &str) -> PackageInfo {
+        serde_json::from_str(&ctx.files().load_string(&format!("level/{}/info.json", package)).expect("Failed to load level info file")).expect("Failed to parse json")
     }
 }
 

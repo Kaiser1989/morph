@@ -12,7 +12,7 @@ use super::{LevelEvent, LevelPhase};
 //////////////////////////////////////////////////
 // GUI
 
-pub fn create(resource: &ResourceContext, phase: LevelPhase) -> GuiBuilder<LevelEvent> {
+pub fn create(config: &Config, resource: &ResourceContext, phase: LevelPhase) -> GuiBuilder<LevelEvent> {
     if let (Some(package_info), Some(level), Some(level_info)) = (resource.package_info(), resource.level(), resource.level_info()) {
         match phase {
             LevelPhase::Preview => GuiBuilder::new("preview")
@@ -30,32 +30,32 @@ pub fn create(resource: &ResourceContext, phase: LevelPhase) -> GuiBuilder<Level
                             GuiBuilder::new("title")
                                 .size(Value::Auto, Value::Auto)
                                 .align(CENTER, CENTER)
-                                .text(&format!("{}: #{}", package_info.name, level), 0.8, CONFIG.color_white),
+                                .text(&format!("{}: #{}", package_info.name, level), 0.8, config.color_white),
                             GuiBuilder::new("morphs").size(Value::Auto, Value::Auto).align(CENTER, CENTER).children(vec![
                                 GuiBuilder::new(MorphState::Metal.to_string())
                                     .size(Value::Fixed(0.8), Value::Fixed(0.8))
                                     .margin(0.05, 0.05, 0.0, 0.0)
                                     .texture(TEX_GUI_METAL, 0)
                                     .align(CENTER, CENTER)
-                                    .text(&format!("{}", level_info.available_morphs[MorphState::Metal]), 0.6, CONFIG.color_white),
+                                    .text(&format!("{}", level_info.available_morphs[MorphState::Metal]), 0.6, config.color_white),
                                 GuiBuilder::new(MorphState::Rubber.to_string())
                                     .size(Value::Fixed(0.8), Value::Fixed(0.8))
                                     .texture(TEX_GUI_RUBBER, 0)
                                     .align(CENTER, CENTER)
                                     .margin(0.05, 0.05, 0.0, 0.0)
-                                    .text(&format!("{}", level_info.available_morphs[MorphState::Rubber]), 0.6, CONFIG.color_white),
+                                    .text(&format!("{}", level_info.available_morphs[MorphState::Rubber]), 0.6, config.color_white),
                                 GuiBuilder::new(MorphState::Water.to_string())
                                     .size(Value::Fixed(0.8), Value::Fixed(0.8))
                                     .margin(0.05, 0.05, 0.0, 0.0)
                                     .texture(TEX_GUI_WATER, 0)
                                     .align(CENTER, CENTER)
-                                    .text(&format!("{}", level_info.available_morphs[MorphState::Water]), 0.6, CONFIG.color_white),
+                                    .text(&format!("{}", level_info.available_morphs[MorphState::Water]), 0.6, config.color_white),
                                 GuiBuilder::new(MorphState::Bubble.to_string())
                                     .size(Value::Fixed(0.8), Value::Fixed(0.8))
                                     .margin(0.05, 0.05, 0.0, 0.0)
                                     .texture(TEX_GUI_BUBBLE, 0)
                                     .align(CENTER, CENTER)
-                                    .text(&format!("{}", level_info.available_morphs[MorphState::Bubble]), 0.6, CONFIG.color_white),
+                                    .text(&format!("{}", level_info.available_morphs[MorphState::Bubble]), 0.6, config.color_white),
                             ]),
                         ]),
                     GuiBuilder::new("spacing").size(Value::Auto, Value::Auto),
@@ -66,7 +66,7 @@ pub fn create(resource: &ResourceContext, phase: LevelPhase) -> GuiBuilder<Level
                         .children(vec![GuiBuilder::new("tap").size(Value::Auto, Value::Auto).align(CENTER, CENTER).text(
                             "(Tap to start)",
                             0.5,
-                            CONFIG.color_white,
+                            config.color_white,
                         )]),
                 ]),
 
@@ -91,9 +91,9 @@ pub fn create(resource: &ResourceContext, phase: LevelPhase) -> GuiBuilder<Level
                                     &format!("{}", level_info.available_morphs[MorphState::Metal]),
                                     1.0,
                                     if level_info.available_morphs[MorphState::Metal] > 0 {
-                                        CONFIG.color_white
+                                        config.color_white
                                     } else {
-                                        CONFIG.color_red
+                                        config.color_red
                                     },
                                 ),
                             GuiBuilder::new(MorphState::Rubber.to_string())
@@ -106,9 +106,9 @@ pub fn create(resource: &ResourceContext, phase: LevelPhase) -> GuiBuilder<Level
                                     &format!("{}", level_info.available_morphs[MorphState::Rubber]),
                                     1.0,
                                     if level_info.available_morphs[MorphState::Rubber] > 0 {
-                                        CONFIG.color_white
+                                        config.color_white
                                     } else {
-                                        CONFIG.color_red
+                                        config.color_red
                                     },
                                 ),
                         ]),
@@ -127,9 +127,9 @@ pub fn create(resource: &ResourceContext, phase: LevelPhase) -> GuiBuilder<Level
                                     &format!("{}", level_info.available_morphs[MorphState::Water]),
                                     1.0,
                                     if level_info.available_morphs[MorphState::Water] > 0 {
-                                        CONFIG.color_white
+                                        config.color_white
                                     } else {
-                                        CONFIG.color_red
+                                        config.color_red
                                     },
                                 ),
                             GuiBuilder::new(MorphState::Bubble.to_string())
@@ -142,9 +142,9 @@ pub fn create(resource: &ResourceContext, phase: LevelPhase) -> GuiBuilder<Level
                                     &format!("{}", level_info.available_morphs[MorphState::Bubble]),
                                     1.0,
                                     if level_info.available_morphs[MorphState::Bubble] > 0 {
-                                        CONFIG.color_white
+                                        config.color_white
                                     } else {
-                                        CONFIG.color_red
+                                        config.color_red
                                     },
                                 ),
                         ]),

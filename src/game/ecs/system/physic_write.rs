@@ -52,24 +52,24 @@ impl<'a> System<'a> for PhysicWriteSystem {
             // update position component
             if let Some(position) = position.as_mut() {
                 let physix_position = data.physix.position(&entity);
-                if position.get_unchecked() != &physix_position {
-                    *position.get_mut_unchecked() = physix_position;
+                if position.get() != &physix_position {
+                    *position.get_mut() = physix_position;
                 }
             }
 
             // update rotation component
             if let Some(rotation) = rotation.as_mut() {
                 let physix_rotation = data.physix.rotation(&entity);
-                if rotation.get_unchecked() != &physix_rotation {
-                    *rotation.get_mut_unchecked() = physix_rotation;
+                if rotation.get() != &physix_rotation {
+                    *rotation.get_mut() = physix_rotation;
                 }
             }
 
             // update velocity component
             if let Some(velocity) = velocity.as_mut() {
                 let physix_velocity = data.physix.velocity(&entity);
-                if velocity.get_unchecked() != &physix_velocity {
-                    *velocity.get_mut_unchecked() = physix_velocity;
+                if velocity.get() != &physix_velocity {
+                    *velocity.get_mut() = physix_velocity;
                 }
             }
         }

@@ -4,6 +4,7 @@
 
 use specs::prelude::*;
 
+use crate::game::config::Config;
 use crate::game::ecs::component::*;
 use crate::game::ecs::event::*;
 use crate::game::ecs::resource::*;
@@ -18,6 +19,7 @@ pub struct InputMorphSystem;
 pub struct Data<'a> {
     // resources
     actors: Read<'a, Actors>,
+    config: Read<'a, Config>,
 
     // events
     event_scene_start: Option<Read<'a, EventSceneStart>>,
@@ -52,6 +54,8 @@ impl<'a> System<'a> for InputMorphSystem {
     }
 
     fn run(&mut self, mut data: Self::SystemData) {
+        let config: Read<'a, Config> = data.config;
+
         // check scene start event
         if let Some(_) = data.event_scene_start {
             let morph_entity = data.actors.morph.unwrap();
@@ -87,15 +91,15 @@ impl<'a> System<'a> for InputMorphSystem {
                 }
             }
             // change physics
-            data.velocity_limit.insert(morph_entity, morph_state.velocity_limit());
-            data.velocity_damping.insert(morph_entity, morph_state.velocity_damping());
-            data.gravity.insert(morph_entity, morph_state.gravity());
-            data.mass.insert(morph_entity, morph_state.mass());
-            data.collision.insert(morph_entity, morph_state.collision());
-            data.sensor.insert(morph_entity, morph_state.sensor());
-            data.material.insert(morph_entity, morph_state.material());
-            data.shape.insert(morph_entity, morph_state.shape());
-            data.texture.insert(morph_entity, morph_state.texture());
+            data.velocity_limit.insert(morph_entity, morph_state.velocity_limit(&config));
+            data.velocity_damping.insert(morph_entity, morph_state.velocity_damping(&config));
+            data.gravity.insert(morph_entity, morph_state.gravity(&config));
+            data.mass.insert(morph_entity, morph_state.mass(&config));
+            data.collision.insert(morph_entity, morph_state.collision(&config));
+            data.sensor.insert(morph_entity, morph_state.sensor(&config));
+            data.material.insert(morph_entity, morph_state.material(&config));
+            data.shape.insert(morph_entity, morph_state.shape(&config));
+            data.texture.insert(morph_entity, morph_state.texture(&config));
         }
     }
 }

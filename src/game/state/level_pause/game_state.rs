@@ -5,6 +5,7 @@ use log::info;
 use nalgebra_glm::*;
 use shrev::ReaderId;
 
+use crate::game::config::Config;
 use crate::game::fx::GraphicsContext;
 use crate::game::resource::{Events, Gui, GuiBuilder, InputContext, ResourceContext};
 use crate::game::state::GameState;
@@ -16,6 +17,7 @@ use super::gui;
 // Definition
 
 pub struct LevelPauseState {
+    config: Config,
     gui: Gui<LevelPauseEvent>,
     events: Events<LevelPauseEvent>,
     reader: ReaderId<LevelPauseEvent>,
@@ -32,18 +34,19 @@ pub enum LevelPauseEvent {
 // Implementation
 
 impl LevelPauseState {
-    pub fn new() -> LevelPauseState {
-        let gui = Gui::new();
+    pub fn new(config: &Config) -> LevelPauseState {
+        let config = config.clone();
+        let gui = Gui::new(&config);
         let mut events = Events::new();
         let reader = events.register();
-        LevelPauseState { gui, events, reader }
+        LevelPauseState { config, gui, events, reader }
     }
 }
 
 impl GameState for LevelPauseState {
     fn init(&mut self, _resource: &ResourceContext) {
         // init gui
-        self.gui.init(&gui::create());
+        self.gui.init(&gui::create(&self.config));
     }
 
     fn cleanup(&mut self, _resource: &ResourceContext) {

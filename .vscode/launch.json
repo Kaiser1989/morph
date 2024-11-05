@@ -11,6 +11,7 @@
             "cargo": {
                 "args": [
                     "build",
+                    "--features=desktop",
                     "--bin=morph-it",
                     "--package=morph-it"
                 ],
