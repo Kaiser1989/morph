@@ -1,15 +1,20 @@
 //////////////////////////////////////////////////
 // Using
 
-use specs::{World, WorldExt};
+use specs::{System, World, WorldExt};
 
-use crate::game::{config::Config, game_state::GameStateEvent, Events, GraphicsContext, InputContext};
+use crate::game::{
+    config::Config,
+    game_state::{GameStateEvent, GameSystem},
+    Events, GraphicsContext, InputContext,
+};
 
 //////////////////////////////////////////////////
 // Definition
 
 pub struct SceneBuilder<E: GameStateEvent> {
     event: Option<E>,
+    update_systems: Vec<dyn GameSystem>,
 }
 
 pub struct Scene<E: GameStateEvent> {
@@ -40,7 +45,10 @@ impl<E: GameStateEvent> Scene<E> {
         self
     }
 
-    pub fn cleanup(&mut self) {}
+    pub fn cleanup(&mut self) {
+        self.world = World::new();
+        self.systems = Systems::default();
+    }
 
     pub fn update(&mut self, elapsed_time: f32, events: &mut Events<E>) {}
 

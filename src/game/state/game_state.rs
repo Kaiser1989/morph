@@ -4,6 +4,7 @@
 use crate::game::{config::Config, Events, GraphicsContext, Gui, GuiBuilder, InputContext, ResourceContext, Scene, SceneBuilder, StateEvent};
 use nalgebra_glm::Vec2;
 use shrev::ReaderId;
+use specs::System;
 
 //////////////////////////////////////////////////
 // Definition
@@ -34,6 +35,8 @@ pub trait GameState {
     }
 }
 
+pub trait GameSystem: Sized {}
+
 pub trait GameStateEvent: Sized + Clone + Send + Sync + 'static {}
 
 pub trait GuiState {
@@ -62,6 +65,8 @@ pub struct GuiStateData<E: GameStateEvent> {
 
 //////////////////////////////////////////////////
 // Implementation
+
+impl<'a, S> GameSystem for S where S: System<'a> + Sized {}
 
 impl<E: GameStateEvent> GuiStateData<E> {
     pub fn new(config: &Config) -> Self {
