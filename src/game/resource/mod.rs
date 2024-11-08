@@ -4,6 +4,9 @@
 pub mod gui;
 pub(crate) use gui::*;
 
+pub mod scene;
+pub(crate) use scene::*;
+
 pub mod event;
 pub(crate) use event::*;
 

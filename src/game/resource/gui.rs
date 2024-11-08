@@ -7,16 +7,16 @@ use std::default::Default;
 use game_gl::gl;
 use itertools::Itertools;
 use nalgebra_glm::*;
-use shrev::Event;
 
 use crate::game::config::*;
 use crate::game::fx::*;
+use crate::game::game_state::GameStateEvent;
 use crate::game::resource::*;
 
 //////////////////////////////////////////////////
 // Definition
 
-pub struct Gui<T: Event + Clone> {
+pub struct Gui<T: GameStateEvent> {
     dimension: Vec2,
     resolution: Vec2,
     builder: GuiBuilder<T>,
@@ -46,7 +46,7 @@ pub struct Space {
 }
 
 #[derive(Clone)]
-pub struct GuiBuilder<T: Event + Clone> {
+pub struct GuiBuilder<T: GameStateEvent> {
     id: &'static str,
     pos: Vec2,
     size: Vec2,
@@ -90,7 +90,7 @@ pub struct GuiFontRenderInfo {
 //////////////////////////////////////////////////
 // Implementation
 
-impl<T: Event + Clone> Gui<T> {
+impl<T: GameStateEvent> Gui<T> {
     pub fn new(config: &Config) -> Gui<T> {
         Gui::<T> {
             dimension: vec2(0.0, 0.0),
@@ -100,12 +100,13 @@ impl<T: Event + Clone> Gui<T> {
         }
     }
 
-    pub fn init(&mut self, builder: &GuiBuilder<T>) {
-        self.builder = builder.clone();
+    pub fn init(mut self, builder: GuiBuilder<T>) -> Self {
+        self.builder = builder;
         // set pos/size of root element
         self.builder.pos = vec2(0.0, self.dimension.y);
         self.builder.size = self.dimension;
         self.builder.layer = self.config.menu_layer;
+        self
     }
 
     pub fn cleanup(&mut self) {
@@ -257,7 +258,7 @@ impl<T: Event + Clone> Gui<T> {
     }
 }
 
-impl<T: Event + Clone> GuiBuilder<T> {
+impl<T: GameStateEvent> GuiBuilder<T> {
     pub fn new(id: &'static str) -> GuiBuilder<T> {
         GuiBuilder {
             id,
@@ -375,7 +376,7 @@ impl<T: Event + Clone> GuiBuilder<T> {
 //////////////////////////////////////////////////
 // Helper
 
-fn update<T: Event + Clone>(element: &mut GuiBuilder<T>, config: &Config) {
+fn update<T: GameStateEvent>(element: &mut GuiBuilder<T>, config: &Config) {
     // get element data
     let pos = element.pos;
     let size = element.size;
@@ -549,7 +550,7 @@ fn update<T: Event + Clone>(element: &mut GuiBuilder<T>, config: &Config) {
     });
 }
 
-fn collect_render_data<T: Event + Clone>(element: &GuiBuilder<T>) -> Vec<GuiRenderInfo> {
+fn collect_render_data<T: GameStateEvent>(element: &GuiBuilder<T>) -> Vec<GuiRenderInfo> {
     let mut data: Vec<GuiRenderInfo> = Vec::new();
 
     // get data of this element
@@ -577,7 +578,7 @@ fn collect_render_data<T: Event + Clone>(element: &GuiBuilder<T>) -> Vec<GuiRend
     data
 }
 
-fn collect_font_render_data<T: Event + Clone>(element: &GuiBuilder<T>, config: &Config) -> Vec<GuiFontRenderInfo> {
+fn collect_font_render_data<T: GameStateEvent>(element: &GuiBuilder<T>, config: &Config) -> Vec<GuiFontRenderInfo> {
     let mut data: Vec<GuiFontRenderInfo> = Vec::new();
 
     // get text data of this element
@@ -604,7 +605,7 @@ fn collect_font_render_data<T: Event + Clone>(element: &GuiBuilder<T>, config: &
     data
 }
 
-fn click_element<T: Event + Clone>(element: &GuiBuilder<T>, click: Vec2) -> Vec<T> {
+fn click_element<T: GameStateEvent>(element: &GuiBuilder<T>, click: Vec2) -> Vec<T> {
     let mut events: Vec<T> = Vec::new();
 
     // get events this element
@@ -624,7 +625,7 @@ fn click_element<T: Event + Clone>(element: &GuiBuilder<T>, click: Vec2) -> Vec<
     events
 }
 
-fn fast_click_element<T: Event + Clone>(element: &GuiBuilder<T>, click: Vec2) -> Vec<T> {
+fn fast_click_element<T: GameStateEvent>(element: &GuiBuilder<T>, click: Vec2) -> Vec<T> {
     let mut events: Vec<T> = Vec::new();
 
     // get events this element
@@ -644,7 +645,7 @@ fn fast_click_element<T: Event + Clone>(element: &GuiBuilder<T>, click: Vec2) ->
     events
 }
 
-fn find_element<'a, T: Event + Clone>(element: &'a mut GuiBuilder<T>, id: &str) -> Option<&'a mut GuiBuilder<T>> {
+fn find_element<'a, T: GameStateEvent>(element: &'a mut GuiBuilder<T>, id: &str) -> Option<&'a mut GuiBuilder<T>> {
     if element.id == id {
         Some(element)
     } else {

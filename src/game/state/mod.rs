@@ -1,6 +1,8 @@
 //////////////////////////////////////////////////
 // Modules
 
+pub mod game_state;
+
 pub mod menu;
 pub(crate) use menu::MenuState;
 
@@ -24,39 +26,3 @@ pub(crate) use level_success::LevelSuccessState;
 
 pub mod level_failure;
 pub(crate) use level_failure::LevelFailureState;
-
-//////////////////////////////////////////////////
-// Using
-
-use crate::game::fx::GraphicsContext;
-use crate::game::resource::{Events, InputContext, ResourceContext};
-use crate::game::StateEvent;
-
-//////////////////////////////////////////////////
-// Trait
-
-pub trait GameState {
-    fn init(&mut self, resource: &ResourceContext);
-
-    fn cleanup(&mut self, resource: &ResourceContext);
-
-    fn handle_input(&mut self, input: &InputContext);
-
-    fn update(&mut self, elapsed_time: f32, events: &mut Events<StateEvent>);
-
-    fn draw(&mut self, graphics: &mut GraphicsContext);
-
-    fn create_device(&mut self, graphics: &mut GraphicsContext);
-
-    fn destroy_device(&mut self, graphics: &mut GraphicsContext);
-
-    fn resize_device(&mut self, graphics: &mut GraphicsContext);
-
-    fn parent_update(&self) -> bool {
-        false
-    }
-
-    fn parent_draw(&self) -> bool {
-        false
-    }
-}

@@ -16,6 +16,7 @@ use std::sync::Arc;
 use config::Config;
 use config::RawConfig;
 use game_gl::prelude::*;
+use game_state::GameState;
 use log::info;
 use shrev::ReaderId;
 
