@@ -149,7 +149,9 @@ impl<T: GameStateEvent> Gui<T> {
         self.update();
     }
 
-    pub fn draw(&self, graphics: &mut GraphicsContext) {
+    pub fn draw(&self, graphics: &GraphicsContext) {
+        let mut graphics = graphics.lock().unwrap();
+
         // clear depth
         graphics.clear_depth();
 
@@ -217,7 +219,8 @@ impl<T: GameStateEvent> Gui<T> {
             graphics.find_texture(texture).bind(1);
 
             // draw
-            graphics.gui_shader.draw_elements_instanced(gl::TRIANGLE_STRIP, graphics.quad_ibo.count(), instances.len());
+            let index_count = graphics.quad_ibo.count();
+            graphics.gui_shader.draw_elements_instanced(gl::TRIANGLE_STRIP, index_count, instances.len());
 
             // unbind textures
             graphics.find_texture(texture).unbind();
@@ -247,7 +250,8 @@ impl<T: GameStateEvent> Gui<T> {
         graphics.glyph_texture.bind(2);
 
         // draw
-        graphics.glyph_shader.draw_elements_instanced(gl::TRIANGLE_STRIP, graphics.quad_ibo.count(), glyph_instances.len());
+        let index_count = graphics.quad_ibo.count();
+        graphics.glyph_shader.draw_elements_instanced(gl::TRIANGLE_STRIP, index_count, glyph_instances.len());
 
         // unbind all
         graphics.glyph_texture.unbind();
@@ -286,7 +290,7 @@ impl<T: GameStateEvent> GuiBuilder<T> {
         self.id
     }
 
-    pub fn size(mut self, width: Value, height: Value) -> GuiBuilder<T> {
+    pub fn size(mut self, width: Value, height: Value) -> Self {
         self.auto_size.x = if let Value::Auto = width { true } else { false };
         self.auto_size.y = if let Value::Auto = height { true } else { false };
         self.size.x = if let Value::Fixed(x) = width { x } else { 0.0 };
@@ -294,68 +298,68 @@ impl<T: GameStateEvent> GuiBuilder<T> {
         self
     }
 
-    pub fn padding(mut self, left: f32, right: f32, bottom: f32, top: f32) -> GuiBuilder<T> {
+    pub fn padding(mut self, left: f32, right: f32, bottom: f32, top: f32) -> Self {
         self.padding = Space { left, right, bottom, top };
         self
     }
 
-    pub fn margin(mut self, left: f32, right: f32, bottom: f32, top: f32) -> GuiBuilder<T> {
+    pub fn margin(mut self, left: f32, right: f32, bottom: f32, top: f32) -> Self {
         self.margin = Space { left, right, bottom, top };
         self
     }
 
-    pub fn vertical(mut self) -> GuiBuilder<T> {
+    pub fn vertical(mut self) -> Self {
         self.align = VERTICAL;
         self
     }
 
-    pub fn flow(mut self, value: usize) -> GuiBuilder<T> {
+    pub fn flow(mut self, value: usize) -> Self {
         self.align = value;
         self
     }
 
-    pub fn align(mut self, x_align: usize, y_align: usize) -> GuiBuilder<T> {
+    pub fn align(mut self, x_align: usize, y_align: usize) -> Self {
         self.x_align = x_align;
         self.y_align = y_align;
         self
     }
 
-    pub fn child(mut self, value: GuiBuilder<T>) -> GuiBuilder<T> {
+    pub fn child(mut self, value: GuiBuilder<T>) -> Self {
         self.children.push(value);
         self
     }
 
-    pub fn children(mut self, value: Vec<GuiBuilder<T>>) -> GuiBuilder<T> {
+    pub fn children(mut self, value: Vec<GuiBuilder<T>>) -> Self {
         self.children.extend(value);
         self
     }
 
-    pub fn texture(mut self, texture: TextureSrc, slot: usize) -> GuiBuilder<T> {
+    pub fn texture(mut self, texture: TextureSrc, slot: usize) -> Self {
         self.texture = Some((texture, slot));
         self
     }
 
-    pub fn color(mut self, r: f32, g: f32, b: f32, a: f32) -> GuiBuilder<T> {
+    pub fn color(mut self, r: f32, g: f32, b: f32, a: f32) -> Self {
         self.color = Some(vec4(r, g, b, a));
         self
     }
 
-    pub fn rounded(mut self, radius: f32) -> GuiBuilder<T> {
+    pub fn rounded(mut self, radius: f32) -> Self {
         self.rounded = Some(radius);
         self
     }
 
-    pub fn text(mut self, text: &str, size: f32, color: Vec4) -> GuiBuilder<T> {
+    pub fn text(mut self, text: &str, size: f32, color: Vec4) -> Self {
         self.text = Some((text.into(), size, color));
         self
     }
 
-    pub fn click(mut self, event: T) -> GuiBuilder<T> {
+    pub fn click(mut self, event: T) -> Self {
         self.click_event = Some(event);
         self
     }
 
-    pub fn fast_click(mut self, event: T) -> GuiBuilder<T> {
+    pub fn fast_click(mut self, event: T) -> Self {
         self.fast_click_event = Some(event);
         self
     }

@@ -28,6 +28,7 @@ pub struct RenderSystemData<'a> {
     entities: Entities<'a>,
     actors: Read<'a, Actors>,
     config: Read<'a, Config>,
+    graphics: Read<'a, GraphicsContext>,
 
     // write components
     position: WriteStorage<'a, Position>,
@@ -53,17 +54,10 @@ impl<'a> System<'a> for RenderSystem {
         Self::SystemData::setup(res);
     }
 
-    fn run(&mut self, _: Self::SystemData) {}
-}
-
-//////////////////////////////////////////////////
-// Implementation
-
-impl RenderSystem {
-    pub fn draw(&self, world: &mut World, graphics: &mut GraphicsContext) {
+    fn run(&mut self, mut data: Self::SystemData) {
         // get world data
-        let mut data: RenderSystemData = world.system_data();
         let config = data.config;
+        let graphics = data.graphics;
 
         // create instances; sort by plane -> layer -> texture
         let mut instances: Vec<(Plane, TextureSrc, Instance)> = (
@@ -105,7 +99,7 @@ impl RenderSystem {
             let camera = data.camera.get(camera_entity).unwrap();
 
             // calculate aspect ratio
-            let resolution = graphics.resolution();
+            let resolution = graphics.lock().unwrap().resolution();
             let aspect_ratio = resolution.x / resolution.y;
             let aspect_vec = if aspect_ratio > 1.0 { vec2(aspect_ratio, 1.0) } else { vec2(1.0, 1.0 / aspect_ratio) };
 
@@ -139,6 +133,7 @@ impl RenderSystem {
         };
 
         // bind shader
+        let mut graphics = graphics.lock().unwrap();
         graphics.quad_shader.bind();
         graphics.quad_shader.link_texture(1, "t_textures");
         graphics.quad_shader.link_uniform(1, "Locals");
@@ -162,7 +157,8 @@ impl RenderSystem {
                 graphics.find_texture(texture).bind(1);
 
                 // draw
-                graphics.quad_shader.draw_elements_instanced(gl::TRIANGLE_STRIP, graphics.quad_ibo.count(), instances.len());
+                let index_count = graphics.quad_ibo.count();
+                graphics.quad_shader.draw_elements_instanced(gl::TRIANGLE_STRIP, index_count, instances.len());
 
                 // unbind textures
                 graphics.find_texture(texture).unbind();

@@ -4,7 +4,7 @@
 use log::info;
 
 use crate::game::config::Config;
-use crate::game::game_state::{GameStateEvent, GuiState, GuiStateData};
+use crate::game::game_state::{GameState, GameStateData, GameStateEvent};
 use crate::game::resource::gui::*;
 use crate::game::resource::{Events, GuiBuilder};
 use crate::game::StateEvent;
@@ -14,7 +14,7 @@ use crate::game::{fx::*, ResourceContext};
 // Definition
 
 pub struct LevelSuccessState {
-    data: GuiStateData<LevelSuccessEvent>,
+    data: GameStateData<LevelSuccessEvent>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -31,14 +31,14 @@ impl GameStateEvent for LevelSuccessEvent {}
 
 impl LevelSuccessState {
     pub fn new(config: &Config) -> Self {
-        Self { data: GuiStateData::new(config) }
+        Self { data: GameStateData::new(config) }
     }
 }
 
-impl GuiState for LevelSuccessState {
+impl GameState for LevelSuccessState {
     type Event = LevelSuccessEvent;
 
-    fn data(&mut self) -> &mut GuiStateData<Self::Event> {
+    fn data(&mut self) -> &mut GameStateData<Self::Event> {
         &mut self.data
     }
 

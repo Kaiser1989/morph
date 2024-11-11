@@ -2,6 +2,8 @@
 // Using
 
 use std::mem::size_of;
+use std::sync::Arc;
+use std::sync::Mutex;
 
 use game_gl::opengl::*;
 use game_gl::prelude::*;
@@ -65,8 +67,10 @@ const MAX_GLYPH_INSTANCES: usize = 4096;
 //////////////////////////////////////////////////
 // Definition
 
+pub type GraphicsContext = Arc<Mutex<RawGraphicsContext>>;
+
 #[derive(Debug, Default)]
-pub struct GraphicsContext {
+pub struct RawGraphicsContext {
     // gl
     gl: Option<Gl>,
 
@@ -107,7 +111,7 @@ pub struct GraphicsContext {
 //////////////////////////////////////////////////
 // Implementation
 
-impl GraphicsContext {
+impl RawGraphicsContext {
     //////////////////////////////////////////////////
     // Device functions
 
@@ -338,8 +342,8 @@ impl GraphicsContext {
 //////////////////////////////////////////////////
 // Trait implementation
 
-unsafe impl Sync for GraphicsContext {}
-unsafe impl Send for GraphicsContext {}
+unsafe impl Sync for RawGraphicsContext {}
+unsafe impl Send for RawGraphicsContext {}
 
 //////////////////////////////////////////////////
 // Helper

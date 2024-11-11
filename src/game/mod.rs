@@ -16,7 +16,7 @@ use std::sync::Arc;
 use config::Config;
 use config::RawConfig;
 use game_gl::prelude::*;
-use game_state::GameState;
+use game_state::InternalGameState;
 use log::info;
 use shrev::ReaderId;
 
@@ -28,7 +28,7 @@ use crate::game::state::*;
 // Definition
 
 pub struct GameManager {
-    states: Vec<Box<dyn GameState>>,
+    states: Vec<Box<dyn InternalGameState>>,
     events: Events<StateEvent>,
     reader: ReaderId<StateEvent>,
     resource: ResourceContext,
@@ -152,11 +152,11 @@ impl GameLoop for GameManager {
                 StateEvent::LoadPackage(package) => {
                     info!("StateEvent: LoadPackage({})", &package);
                     self.resource.load_package(ctx, &package);
-                    self.graphics.load_package_textures(ctx, self.resource.package_info().unwrap());
+                    self.graphics.lock().unwrap().load_package_textures(ctx, self.resource.package_info().unwrap());
                 }
                 StateEvent::UnloadPackage => {
                     info!("StateEvent: UnloadPackage");
-                    self.graphics.unload_package_textures();
+                    self.graphics.lock().unwrap().unload_package_textures();
                     self.resource.unload_package();
                 }
                 StateEvent::LoadLevel(level) => {
@@ -183,52 +183,49 @@ impl GameLoop for GameManager {
 
     fn render(&mut self, _ctx: &mut GameContext, _gl: &Gl) {
         // clear frame
-        self.graphics.clear();
+        self.graphics.lock().unwrap().clear();
 
         // find all states to be drawn
         let draw_index = self.states.iter().rposition(|state| !state.parent_draw());
-        let graphics = &mut self.graphics;
         (&mut self.states[draw_index.unwrap_or(0)..]).iter_mut().for_each(|state| {
-            state.draw(graphics);
+            state.draw(&self.graphics);
         });
     }
 
     fn create_device(&mut self, ctx: &mut GameContext, gl: &Gl) {
         // create device context
-        self.graphics.create(ctx, &self.config, gl);
+        self.graphics.lock().unwrap().create(ctx, &self.config, gl);
 
         // load package graphics
         if let Some(package_info) = self.resource.package_info() {
-            self.graphics.load_package_textures(ctx, package_info);
+            self.graphics.lock().unwrap().load_package_textures(ctx, package_info);
         }
 
         // update all states
-        let graphics = &mut self.graphics;
         self.states.iter_mut().for_each(|state| {
-            state.create_device(graphics);
+            state.create_device(&self.graphics);
         });
     }
 
     fn destroy_device(&mut self, _ctx: &mut GameContext, _gl: &Gl) {
         // update all states
-        let graphics = &mut self.graphics;
         self.states.iter_mut().for_each(|state| {
-            state.destroy_device(graphics);
+            state.destroy_device(&self.graphics);
         });
 
         // unload package graphics
-        self.graphics.unload_package_textures();
+        self.graphics.lock().unwrap().unload_package_textures();
 
         // destroy device context
-        self.graphics.destroy();
+        self.graphics.lock().unwrap().destroy();
     }
 
     fn resize_device(&mut self, _ctx: &mut GameContext, _gl: &Gl, width: u32, height: u32) {
         // resize device
-        self.graphics.resize(width, height);
+        self.graphics.lock().unwrap().resize(width, height);
 
         // update input context
-        self.input.change_resolution(self.graphics.resolution());
+        self.input.change_resolution(self.graphics.lock().unwrap().resolution());
 
         // update all states
         let graphics = &mut self.graphics;
@@ -265,12 +262,12 @@ impl GameManager {
         }
     }
 
-    pub fn change_state(&mut self, state: Box<dyn GameState>) {
+    pub fn change_state(&mut self, state: Box<dyn InternalGameState>) {
         self.pop_state();
         self.push_state(state);
     }
 
-    pub fn push_state(&mut self, state: Box<dyn GameState>) {
+    pub fn push_state(&mut self, state: Box<dyn InternalGameState>) {
         self.states.push(state);
         if let Some(state) = self.states.last_mut() {
             // init state

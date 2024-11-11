@@ -6,17 +6,21 @@ use nalgebra_glm::*;
 
 use crate::game::config::Config;
 use crate::game::ecs::resource::MorphState;
-use crate::game::game_state::{GameStateEvent, GuiState, GuiStateData};
+use crate::game::ecs::system::{
+    AnimationSystem, InputCameraSystem, InputMorphSystem, LifetimeSystem, OutputSystem, PhysicFollowSystem, PhysicForceSystem, PhysicInteractionSystem, PhysicReadSystem, PhysicSyncSystem,
+    PhysicUpdateSystem, PhysicWriteSystem, RenderSystem, StoryInteractionSystem, StoryMorphAnimationSystem, StoryMorphSystem,
+};
+use crate::game::game_state::{GameState, GameStateData, GameStateEvent};
 use crate::game::resource::gui::*;
 use crate::game::resource::Events;
-use crate::game::{fx::*, ResourceContext};
+use crate::game::{fx::*, ResourceContext, SceneBuilder};
 use crate::game::{GuiBuilder, StateEvent};
 
 //////////////////////////////////////////////////
 // Definition
 
 pub struct LevelState {
-    data: GuiStateData<LevelEvent>,
+    data: GameStateData<LevelEvent>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -36,14 +40,14 @@ impl GameStateEvent for LevelEvent {}
 
 impl LevelState {
     pub fn new(config: &Config) -> Self {
-        Self { data: GuiStateData::new(config) }
+        Self { data: GameStateData::new(config) }
     }
 }
 
-impl GuiState for LevelState {
+impl GameState for LevelState {
     type Event = LevelEvent;
 
-    fn data(&mut self) -> &mut GuiStateData<Self::Event> {
+    fn data(&mut self) -> &mut GameStateData<Self::Event> {
         &mut self.data
     }
 
@@ -67,6 +71,28 @@ impl GuiState for LevelState {
             }
             _ => {}
         }
+    }
+
+    fn scene(&self, _resource: &ResourceContext) -> Option<SceneBuilder> {
+        Some(
+            SceneBuilder::new()
+                .update_system::<InputMorphSystem>()
+                .update_system::<InputCameraSystem>()
+                .update_system::<PhysicSyncSystem>()
+                .update_system::<PhysicForceSystem>()
+                .update_system::<PhysicWriteSystem>()
+                .update_system::<PhysicUpdateSystem>()
+                .update_system::<PhysicFollowSystem>()
+                .update_system::<PhysicInteractionSystem>()
+                .update_system::<PhysicReadSystem>()
+                .update_system::<StoryInteractionSystem>()
+                .update_system::<StoryMorphSystem>()
+                .update_system::<StoryMorphAnimationSystem>()
+                .update_system::<AnimationSystem>()
+                .update_system::<LifetimeSystem>()
+                .update_system::<OutputSystem>()
+                .render_system::<RenderSystem>(),
+        )
     }
 
     fn gui(&self, resource: &ResourceContext) -> Option<GuiBuilder<Self::Event>> {
