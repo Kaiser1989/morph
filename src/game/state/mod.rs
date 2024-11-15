@@ -1,8 +1,6 @@
 //////////////////////////////////////////////////
 // Modules
 
-pub mod game_state;
-
 pub mod menu;
 pub(crate) use menu::MenuState;
 

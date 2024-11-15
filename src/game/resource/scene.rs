@@ -112,6 +112,10 @@ impl<E: GameStateEvent> Scene<E> {
     }
 
     pub fn handle_input(&self, input: &InputContext, events: &mut Events<E>) {
-        // TODO??
+        // TODO!!! Sollte irgendwie ein trait sein?
+    }
+
+    pub fn handle_events(&self) {
+        // TODO!!! Sollte irgendwie ein trait sein?
     }
 }
